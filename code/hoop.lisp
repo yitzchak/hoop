@@ -18,9 +18,29 @@
   (declare (ignore initargs))
   (make-hoop-expansion :bindings (list (list var initform))
                        :prologue (when testp
-                                   (list (list `(when ,test (hoop-finish)))))
+                                   (list `(when ,test (hoop-finish))))
                        :epilogue (when nextp
-                                   (list (list `(setf ,var ,next))))))
+                                   (list `(setf ,var ,next)))))
+
+(defmethod hoop-expand (var (action (eql :up)) initform &rest initargs
+                        &key (to nil top) (end nil endp) (by nil byp) &allow-other-keys)
+  (declare (ignore initargs))
+  (make-hoop-expansion :bindings (list (list var initform))
+                       :prologue (cond (top
+                                        (list `(when (> ,var ,to) (hoop-finish))))
+                                       (endp
+                                        (list `(unless (< ,var ,end) (hoop-finish)))))
+                       :epilogue (list `(incf ,var ,(if byp by 1)))))
+
+(defmethod hoop-expand (var (action (eql :down)) initform &rest initargs
+                        &key (to nil top) (end nil endp) (by nil byp) &allow-other-keys)
+  (declare (ignore initargs))
+  (make-hoop-expansion :bindings (list (list var initform))
+                       :prologue (cond (top
+                                        (list `(when (< ,var ,to) (hoop-finish))))
+                                       (endp
+                                        (list `(unless (> ,var ,end) (hoop-finish)))))
+                       :epilogue (list `(decf ,var ,(if byp by 1)))))
 
 (defmethod hoop-expand (var (action (eql :in)) initform &rest initargs &key by &allow-other-keys)
   (declare (ignore initargs))
@@ -29,6 +49,40 @@
                          :symbol-macros (list (list var `(car ,list-var)))
                          :prologue (list `(unless ,list-var (hoop-finish)))
                          :epilogue (list `(setf ,list-var (funcall ,(or by #'cdr) ,list-var))))))
+
+(defmethod hoop-expand (var (action (eql :key)) initform &rest initargs &key (value nil valuep) &allow-other-keys)
+  (declare (ignore initargs))
+  (let ((iterator-var (gensym))
+        (next-var (gensym)))
+    (make-hoop-expansion :bindings (list* var next-var
+                                          (list iterator-var `(with-hash-table-iterator (f ,initform) (lambda () (f))))
+                                          (when valuep
+                                            (list value)))
+                         :prologue (list `(multiple-value-setq ,(if valuep
+                                                                    (list next-var var value)
+                                                                    (list next-var var))
+                                              (funcall ,iterator-var))
+                                         `(unless ,next-var (hoop-finish))))))
+
+(defmethod hoop-expand (var (action (eql :alist)) initform &rest initargs &key (value nil valuep) &allow-other-keys)
+  (declare (ignore initargs))
+  (let ((list-var (gensym)))
+    (make-hoop-expansion :bindings (list (list list-var initform))
+                         :symbol-macros (list* (list var `(caar ,list-var))
+                                               (when valuep
+                                                 (list (list value `(cdar ,list-var)))))
+                         :prologue (list `(unless ,list-var (hoop-finish)))
+                         :epilogue (list `(pop ,list-var)))))
+
+(defmethod hoop-expand (var (action (eql :plist)) initform &rest initargs &key (value nil valuep) &allow-other-keys)
+  (declare (ignore initargs))
+  (let ((list-var (gensym)))
+    (make-hoop-expansion :bindings (list (list list-var initform))
+                         :symbol-macros (list* (list var `(car ,list-var))
+                                               (when valuep
+                                                 (list (list value `(cadr ,list-var)))))
+                         :prologue (list `(unless ,list-var (hoop-finish)))
+                         :epilogue (list `(setf ,list-var (cddr ,list-var))))))
 
 (defmethod hoop-expand (var (action (eql :across)) initform &rest initargs
                         &key key start end from-end &allow-other-keys)
@@ -54,7 +108,7 @@
   (let ((tail-var (gensym)))
     (make-hoop-expansion :bindings (list (list var initform)
                                          (list tail-var `(last ,var)))
-                         :functions (list `(,(intern (format nil "COLLECT-~A" var)) (x)
+                         :functions (list `(,var (x)
                                              (if ,tail-var
                                                  (setf (cdr ,tail-var) (list x)
                                                        ,tail-var (cdr ,tail-var))
