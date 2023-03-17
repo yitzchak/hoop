@@ -11,4 +11,7 @@
       :serial t
       :components
         ((:file "packages")
-         (:file "hoop")))))
+         (:file "hoop")
+         (:file "list")
+         (:file "collect")
+         (:file "package")))))

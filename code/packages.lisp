@@ -1,8 +1,12 @@
 (defpackage #:hoop
   (:use #:common-lisp)
   (:documentation "Common Lisp iteration")
-  (:export #:hoop
+  (:export #:bindings
+           #:declarations
+           #:epilogue
+           #:expand
+           #:hoop
            #:hoop-finish
-           #:hoop-expand
-           #:hoop-expansion))
-
+           #:prologue
+           #:wrap-inner
+           #:wrap-outer))
