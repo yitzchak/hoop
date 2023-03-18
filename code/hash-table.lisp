@@ -43,14 +43,6 @@
     ,(or (value-var clause) (second (var clause)))
     ,(successp-var clause)))
 
-(defmethod declarations ((clause hash-table-clause))
-  (cond ((and (key-var clause) (value-var clause))
-         `((declare (ignorable ,(key-var clause) ,(value-var clause)))))
-        ((key-var clause)
-         `((declare (ignorable ,(key-var clause)))))
-        ((value-var clause)
-         `((declare (ignorable ,(value-var clause)))))))
-
 (defmethod prologue ((clause hash-table-clause))
   `((multiple-value-setq (,(successp-var clause)
                           ,(or (key-var clause) (first (var clause)))

@@ -11,8 +11,11 @@
       :components
         ((:file "packages")
          (:file "hoop" :depends-on ("packages"))
+         (:file "arithmetic" :depends-on ("hoop"))
          (:file "list" :depends-on ("hoop"))
          (:file "accumulate" :depends-on ("hoop"))
          (:file "sequence" :depends-on ("hoop"))
          (:file "package" :depends-on ("hoop"))
+         (:file "equals" :depends-on ("hoop"))
+         (:file "generator" :depends-on ("hoop"))
          (:file "hash-table" :depends-on ("hoop"))))))
