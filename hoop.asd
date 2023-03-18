@@ -8,10 +8,11 @@
   :depends-on (#:trivial-cltl2)
   :components
     ((:module code
-      :serial t
       :components
         ((:file "packages")
-         (:file "hoop")
-         (:file "list")
-         (:file "collect")
-         (:file "package")))))
+         (:file "hoop" :depends-on ("packages"))
+         (:file "list" :depends-on ("hoop"))
+         (:file "accumulate" :depends-on ("hoop"))
+         (:file "sequence" :depends-on ("hoop"))
+         (:file "package" :depends-on ("hoop"))
+         (:file "hash-table" :depends-on ("hoop"))))))

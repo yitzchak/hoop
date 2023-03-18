@@ -4,7 +4,7 @@
   ((tail-var :reader tail-var
              :initform (gensym ))))
 
-(defmethod expand (var (action (eql :collect)) initform &rest initargs &key &allow-other-keys)
+(defmethod expand (var (action (eql :into-list)) &optional initform &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   (make-instance 'collect-clause :var var :initform initform))
 
@@ -13,9 +13,9 @@
     (,(tail-var clause) (last ,(var clause)))))
 
 (defmethod wrap-inner ((clause collect-clause) form)
-  `(flet ((,(var clause) (x &optional method)
+  `(flet ((,(var clause) (x &optional (method :collect))
             (check-type method
-                        (member nil :append :nconc))
+                        (member :collect :append :nconc))
             (when method
               (check-type x list))
             (if ,(tail-var clause)

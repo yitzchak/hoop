@@ -33,40 +33,6 @@
                          (list `(unless (> ,var ,end) (hoop-finish)))))
         :epilogue (list `(decf ,var ,(if byp by 1)))))
 
-(defmethod hoop-expand (var (action (eql :key)) initform &rest initargs &key (value nil valuep) &allow-other-keys)
-  (declare (ignore initargs))
-  (let ((iterator-var (gensym))
-        (next-var (gensym)))
-    (list :bindings (list* var next-var
-                           (list iterator-var `(with-hash-table-iterator (f ,initform) (lambda () (f))))
-                           (when valuep
-                             (list value)))
-          :prologue (list `(multiple-value-setq ,(if valuep
-                                                     (list next-var var value)
-                                                     (list next-var var))
-                             (funcall ,iterator-var))
-                          `(unless ,next-var (hoop-finish))))))
-
-(defmethod hoop-expand (var (action (eql :alist)) initform &rest initargs &key (value nil valuep) &allow-other-keys)
-  (declare (ignore initargs))
-  (let ((list-var (gensym)))
-    (list :bindings (list (list list-var initform))
-          :symbol-macros (list* (list var `(caar ,list-var))
-                                (when valuep
-                                  (list (list value `(cdar ,list-var)))))
-          :prologue (list `(unless ,list-var (hoop-finish)))
-          :epilogue (list `(pop ,list-var)))))
-
-(defmethod hoop-expand (var (action (eql :plist)) initform &rest initargs &key (value nil valuep) &allow-other-keys)
-  (declare (ignore initargs))
-  (let ((list-var (gensym)))
-    (list :bindings (list (list list-var initform))
-          :symbol-macros (list* (list var `(car ,list-var))
-                                (when valuep
-                                  (list (list value `(cadr ,list-var)))))
-          :prologue (list `(unless ,list-var (hoop-finish)))
-          :epilogue (list `(setf ,list-var (cddr ,list-var))))))
-
 (defmethod hoop-expand (var (action (eql :across)) initform &rest initargs
                         &key key start end from-end &allow-other-keys)
   (declare (ignore initargs))
@@ -86,7 +52,7 @@
                                  (hoop-finish)))
               :epilogue (list `(incf ,index-var))))))|#
 
-(defgeneric expand (var action initform &rest initargs &key &allow-other-keys))
+(defgeneric expand (var action &optional initform &rest initargs &key &allow-other-keys))
 
 (defgeneric wrap-inner (clause form)
   (:method (clause form)
@@ -123,6 +89,16 @@
         :initarg :var)
    (initform :reader initform
              :initarg :initform)))
+
+(defun symbol-macros-from-d-var-spec (var-spec form)
+  (check-type var-spec (or symbol cons))
+  (cond ((null var-spec)
+         nil)
+        ((symbolp var-spec)
+         `((,var-spec ,form)))
+        (t
+         (nconc (symbol-macros-from-d-var-spec (car var-spec) `(car ,form))
+                (symbol-macros-from-d-var-spec (cdr var-spec) `(cdr ,form))))))
 
 (defmacro hoop (clauses return-form &body body)
   (multiple-value-bind (forms declarations)

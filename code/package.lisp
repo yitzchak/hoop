@@ -14,7 +14,7 @@
                 :initarg :package-var
                 :initform (gensym))))
 
-(defmethod expand (var (action (eql :symbols)) initform &rest initargs
+(defmethod expand (var (action (eql :symbols)) &optional initform &rest initargs
                    &key (symbol-types '(:external))
                         (status (gensym))
                         (package (gensym))
