@@ -5,7 +5,6 @@
   :version "0.1"
   :homepage "https://yitzchak.github.io/hoop/"
   :bug-tracker "https://github.com/yitzchak/hoop/issues"
-  :depends-on (#:trivial-cltl2)
   :components
     ((:module code
       :components
@@ -13,6 +12,7 @@
          (:file "clause" :depends-on ("packages"))
          (:file "step" :depends-on ("clause"))
          (:file "list" :depends-on ("clause"))
+         (:file "return" :depends-on ("clause"))
          (:file "accumulate" :depends-on ("clause"))
          (:file "sequence" :depends-on ("clause"))
          (:file "package" :depends-on ("clause"))
