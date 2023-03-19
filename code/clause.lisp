@@ -32,6 +32,11 @@
     (declare (ignore clause))
     nil))
 
+(defgeneric finish-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
 (defgeneric return-form (clause)
   (:method (clause)
     (declare (ignore clause))

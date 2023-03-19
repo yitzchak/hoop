@@ -22,16 +22,17 @@
                                                clauses
                                                :from-end t
                                                :initial-value `(tagbody
-                                                                  ,repeat-tag
-                                                                  ,.(mapcan #'prologue-forms clauses)
-                                                                  ,.forms
-                                                                  ,.(mapcan #'epilogue-forms clauses)
-                                                                  (go ,repeat-tag)
-                                                                  ,finish-tag
-                                                                  (return ,(block nil
-                                                                             (mapc (lambda (clause)
-                                                                                     (multiple-value-bind (returnp form)
-                                                                                         (return-form clause)
-                                                                                       (when returnp
-                                                                                         (return form))))
-                                                                                   clauses))))))))))))
+                                                                ,repeat-tag
+                                                                 ,.(mapcan #'prologue-forms clauses)
+                                                                 ,.forms
+                                                                 ,.(mapcan #'epilogue-forms clauses)
+                                                                 (go ,repeat-tag)
+                                                                ,finish-tag
+                                                                 ,.(mapcan #'finish-forms clauses)
+                                                                 (return ,(block nil
+                                                                            (mapc (lambda (clause)
+                                                                                    (multiple-value-bind (returnp form)
+                                                                                        (return-form clause)
+                                                                                      (when returnp
+                                                                                        (return form))))
+                                                                                  clauses))))))))))))
