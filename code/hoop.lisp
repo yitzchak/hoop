@@ -2,56 +2,6 @@
 
 (defmacro hoop-finish ())
 
-#|(defgeneric hoop-expand (var action initform &rest initargs &key &allow-other-keys))
-
-(defmethod hoop-expand (var (action (eql :=)) initform &rest initargs
-                        &key (next nil nextp) (test nil testp) &allow-other-keys)
-  (declare (ignore initargs))
-  (list :bindings (list (list var initform))
-        :prologue (when testp
-                    (list `(when ,test (hoop-finish))))
-        :epilogue (when nextp
-                    (list `(setf ,var ,next)))))
-
-(defmethod hoop-expand (var (action (eql :up)) initform &rest initargs
-                        &key (to nil top) (end nil endp) (by nil byp) &allow-other-keys)
-  (declare (ignore initargs))
-  (list :bindings (list (list var initform))
-        :prologue (cond (top
-                         (list `(when (> ,var ,to) (hoop-finish))))
-                        (endp
-                         (list `(unless (< ,var ,end) (hoop-finish)))))
-        :epilogue (list `(incf ,var ,(if byp by 1)))))
-
-(defmethod hoop-expand (var (action (eql :down)) initform &rest initargs
-                        &key (to nil top) (end nil endp) (by nil byp) &allow-other-keys)
-  (declare (ignore initargs))
-  (list :bindings (list (list var initform))
-        :prologue (cond (top
-                         (list `(when (< ,var ,to) (hoop-finish))))
-                        (endp
-                         (list `(unless (> ,var ,end) (hoop-finish)))))
-        :epilogue (list `(decf ,var ,(if byp by 1)))))
-
-(defmethod hoop-expand (var (action (eql :across)) initform &rest initargs
-                        &key key start end from-end &allow-other-keys)
-  (declare (ignore initargs))
-  (let ((seq-var (gensym))
-        (index-var (gensym)))
-    (if from-end
-        (list :bindings (list (list seq-var initform)
-                              (list index-var (or start (1- (length seq-var)))))
-              :symbol-macros (list (list var `(aref ,seq-var ,index-var)))
-              :prologue (list `(unless (> ,index-var (or ,end -1) ,seq-var)
-                                 (hoop-finish)))
-              :epilogue (list `(decf ,index-var)))
-        (list :bindings (list (list seq-var initform)
-                              (list index-var (or start 0)))
-              :symbol-macros (list (list var `(aref ,seq-var ,index-var)))
-              :prologue (list `(unless (< ,index-var (or ,end (length ,seq-var)))
-                                 (hoop-finish)))
-              :epilogue (list `(incf ,index-var))))))|#
-
 (defgeneric expand (var action &optional initform &rest initargs &key &allow-other-keys))
 
 (defgeneric wrap-inner (clause form)

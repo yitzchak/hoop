@@ -78,7 +78,8 @@
 ```
 
 ```lisp
-(hoop ((item :in-list '(1 2 3 4 5) by #'cddr))
+(hoop ((item :in-list '(1 2 3 4 5)
+             :by #'cddr))
       nil
   (print item))
 ```
@@ -107,7 +108,7 @@
 
 ```lisp
 (hoop ((sublist :on-list '(a b c d))
-       (c :accumulate))
+       (c :into))
       c
   (c sublist))
 ```
