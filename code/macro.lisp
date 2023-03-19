@@ -5,27 +5,33 @@
 (defmacro hoop (clauses &body body)
   (multiple-value-bind (forms declarations)
       (uiop:parse-body body)
-    (let* ((expansions (mapcar (lambda (args)
-                                 (apply #'make-clause args))
-                               clauses))
-           (repeat-tag (gensym))
-           (finish-tag (gensym)))
+    (let ((clauses (mapcar (lambda (args)
+                             (apply #'make-clause args))
+                           clauses))
+          (repeat-tag (gensym))
+          (finish-tag (gensym)))
       `(block nil
          ,(reduce #'wrap-outer
-                  expansions :from-end t
-                  :initial-value `(let* ,(mapcan #'bindings expansions)
+                  clauses :from-end t
+                  :initial-value `(let* ,(mapcan #'bindings clauses)
                                     ,.declarations
-                                    ,.(mapcan #'declarations expansions)
+                                    ,.(mapcan #'declarations clauses)
                                     (macrolet ((hoop-finish ()
                                                  (list 'go ',finish-tag)))                                                              
                                       ,(reduce #'wrap-inner                                     
-                                               expansions
+                                               clauses
                                                :from-end t
                                                :initial-value `(tagbody
-                                                                ,repeat-tag
-                                                                  ,.(mapcan #'prologue-forms expansions)
+                                                                  ,repeat-tag
+                                                                  ,.(mapcan #'prologue-forms clauses)
                                                                   ,.forms
-                                                                  ,.(mapcan #'epilogue-forms expansions)
+                                                                  ,.(mapcan #'epilogue-forms clauses)
                                                                   (go ,repeat-tag)
-                                                                ,finish-tag
-                                                                  (return ,(some #'return-form expansions)))))))))))
+                                                                  ,finish-tag
+                                                                  (return ,(block nil
+                                                                             (mapc (lambda (clause)
+                                                                                     (multiple-value-bind (returnp form)
+                                                                                         (return-form clause)
+                                                                                       (when returnp
+                                                                                         (return form))))
+                                                                                   clauses))))))))))))

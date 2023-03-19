@@ -5,7 +5,7 @@
              :initform (gensym )))
   (:default-initargs :into nil))
 
-(defmethod make-clause ((keyword (eql :collect)) &rest initargs)
+(defmethod make-clause ((type (eql :collect)) &rest initargs)
   (apply #'make-instance 'collect-clause :var-spec initargs))
 
 (defmethod bindings ((clause collect-clause))  
@@ -43,4 +43,4 @@
      ,form))
 
 (defmethod return-form ((clause collect-clause))
-  (var-spec clause))
+  (values t (var-spec clause)))

@@ -15,7 +15,7 @@
                 :initarg :package
                 :initform (gensym))))
 
-(defmethod make-clause ((action (eql :symbols)) &rest initargs)
+(defmethod make-clause ((type (eql :symbols)) &rest initargs)
   (apply #'make-instance 'package-clause :var-spec initargs))
 
 (defmethod wrap-outer ((clause package-clause) form)

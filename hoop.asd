@@ -19,4 +19,5 @@
          (:file "with" :depends-on ("clause"))
          (:file "generator" :depends-on ("clause"))
          (:file "hash-table" :depends-on ("clause"))
+         (:file "termination" :depends-on ("clause"))
          (:file "macro" :depends-on ("clause"))))))

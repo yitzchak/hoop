@@ -20,7 +20,7 @@
         :initarg :end
         :initform nil)))
 
-(defmethod make-clause ((action (eql :in-seq)) &rest initargs)
+(defmethod make-clause ((type (eql :in-seq)) &rest initargs)
   (apply #'make-instance 'sequence-clause :var-spec initargs))
 
 (defmethod bindings ((clause sequence-clause))

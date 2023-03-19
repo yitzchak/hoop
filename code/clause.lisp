@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defgeneric make-clause (keyword &rest initargs))
+(defgeneric make-clause (type &rest initargs))
 
 (defgeneric wrap-inner (clause form)
   (:method (clause form)
@@ -35,7 +35,7 @@
 (defgeneric return-form (clause)
   (:method (clause)
     (declare (ignore clause))
-    nil))
+    (values nil nil)))
 
 (defclass var-spec-slot ()
   ((var-spec :accessor var-spec

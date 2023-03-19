@@ -21,7 +21,7 @@
   (when (listp (second (var-spec instance)))
     (setf (value-var instance) (gensym))))
 
-(defmethod make-clause ((keyword (eql :in-hash-table)) &rest initargs)
+(defmethod make-clause ((type (eql :in-hash-table)) &rest initargs)
   (apply #'make-instance 'hash-table-clause :var-spec initargs))
 
 (defmethod wrap-outer ((clause hash-table-clause) form)
