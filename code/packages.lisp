@@ -3,10 +3,10 @@
   (:documentation "Common Lisp iteration")
   (:export #:bindings
            #:declarations
-           #:epilogue
-           #:expand
+           #:epilogue-form
            #:hoop
            #:hoop-finish
-           #:prologue
+           #:make-clause
+           #:prologue-form
            #:wrap-inner
            #:wrap-outer))

@@ -1,22 +1,22 @@
 (in-package #:hoop)
 
-(defclass collect-clause (clause)
+(defclass collect-clause (var-spec-slot into-form-slot)
   ((tail-var :reader tail-var
-             :initform (gensym ))))
+             :initform (gensym )))
+  (:default-initargs :into nil))
 
-(defmethod expand (var (action (eql :into-list)) &optional initform &rest initargs &key &allow-other-keys)
-  (declare (ignore initargs))
-  (make-instance 'collect-clause :var var :initform initform))
+(defmethod make-clause ((keyword (eql :collect)) &rest initargs)
+  (apply #'make-instance 'collect-clause :var-spec initargs))
 
 (defmethod bindings ((clause collect-clause))  
-  `((,(var clause) ,(initform clause))
-    (,(tail-var clause) (last ,(var clause)))))
+  `((,(var-spec clause) ,(into-form clause))
+    (,(tail-var clause) (last ,(var-spec clause)))))
 
 (defmethod wrap-inner ((clause collect-clause) form)
-  `(flet ((,(var clause) (x &optional (method :collect))
+  `(flet ((,(var-spec clause) (x &optional (method :collect))
             (check-type method
                         (member :collect :append :nconc))
-            (when method
+            (unless (eq method :collect)
               (check-type x list))
             (if ,(tail-var clause)
                 (case method
@@ -31,13 +31,16 @@
                          ,(tail-var clause) (cdr ,(tail-var clause)))))
                 (case method
                   (:append
-                   (setf ,(var clause) (copy-list x)
-                         ,(tail-var clause) (last ,(var clause))))
+                   (setf ,(var-spec clause) (copy-list x)
+                         ,(tail-var clause) (last ,(var-spec clause))))
                   (:nconc
-                   (setf ,(var clause) x
-                         ,(tail-var clause) (last ,(var clause))))
+                   (setf ,(var-spec clause) x
+                         ,(tail-var clause) (last ,(var-spec clause))))
                   (otherwise
-                   (setf ,(var clause) (list x)
-                         ,(tail-var clause) ,(var clause)))))
+                   (setf ,(var-spec clause) (list x)
+                         ,(tail-var clause) ,(var-spec clause)))))
             x))
      ,form))
+
+(defmethod return-form ((clause collect-clause))
+  (var-spec clause))

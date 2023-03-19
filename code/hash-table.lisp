@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defclass hash-table-clause (clause)
+(defclass hash-table-clause (var-spec-slot initform-slot)
   ((iterator-var :reader iterator-var
                  :initform (gensym))
    (successp-var :reader successp-var
@@ -12,15 +12,17 @@
               :initarg :value-var
               :initform nil)))
 
-(defmethod expand (var (action (eql :in-hash-table)) &optional initform &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance :after ((instance hash-table-clause) &rest initargs &key)
   (declare (ignore initargs))
-  (check-type var (cons (or symbol cons) (cons (or symbol cons) null)))
-  (make-instance 'hash-table-clause
-                 :var var :initform initform
-                 :key-var (when (listp (first var))
-                            (gensym))
-                 :value-var (when (listp (second var))
-                              (gensym))))
+  (check-type (var-spec instance)
+              (cons (or symbol cons) (cons (or symbol cons) null)))
+  (when (listp (first (var-spec instance)))
+    (setf (key-var instance) (gensym)))
+  (when (listp (second (var-spec instance)))
+    (setf (value-var instance) (gensym))))
+
+(defmethod make-clause ((keyword (eql :in-hash-table)) &rest initargs)
+  (apply #'make-instance 'hash-table-clause :var-spec initargs))
 
 (defmethod wrap-outer ((clause hash-table-clause) form)
   `(with-hash-table-iterator (,(iterator-var clause) ,(initform clause))
@@ -30,23 +32,23 @@
   (if (or (key-var clause)
           (value-var clause))
       `(symbol-macrolet ,(nconc (when (key-var clause)
-                                  (symbol-macros-from-d-var-spec (first (var clause))
+                                  (symbol-macros-from-d-var-spec (first (var-spec clause))
                                                                  (key-var clause)))
                                 (when (value-var clause)
-                                  (symbol-macros-from-d-var-spec (second (var clause))
+                                  (symbol-macros-from-d-var-spec (second (var-spec clause))
                                                                  (value-var clause))))
          ,form)
       form))
 
 (defmethod bindings ((clause hash-table-clause))
-  `(,(or (key-var clause) (first (var clause)))
-    ,(or (value-var clause) (second (var clause)))
+  `(,(or (key-var clause) (first (var-spec clause)))
+    ,(or (value-var clause) (second (var-spec clause)))
     ,(successp-var clause)))
 
-(defmethod prologue ((clause hash-table-clause))
+(defmethod prologue-forms ((clause hash-table-clause))
   `((multiple-value-setq (,(successp-var clause)
-                          ,(or (key-var clause) (first (var clause)))
-                          ,(or (value-var clause) (second (var clause))))
+                          ,(or (key-var clause) (first (var-spec clause)))
+                          ,(or (value-var clause) (second (var-spec clause))))
       (,(iterator-var clause)))
     (unless ,(successp-var clause)
       (hoop-finish))))

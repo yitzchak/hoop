@@ -1,39 +1,39 @@
 (in-package #:hoop)
 
-(defclass list-clause (clause)
+(defclass list-clause (var-spec-slot by-form-slot)
   ((list-var :reader list-var
-             :initform (gensym))
-   (by :reader by
-       :initarg :by)))
+             :initform (gensym)))
+  (:default-initargs :by #'cdr))
 
-(defclass in-clause (list-clause)
+(defclass in-clause (list-clause in-form-slot)
   ())
 
-(defclass on-clause (list-clause)
+(defclass on-clause (list-clause on-form-slot)
   ())
 
-(defmethod expand (var (action (eql :in-list)) &optional initform &rest initargs &key by &allow-other-keys)
-  (declare (ignore initargs))
-  (make-instance 'in-clause :var var :initform initform :by (or by #'cdr)))
+(defmethod make-clause ((keyword (eql :for)) &rest initargs)
+  (apply #'make-instance (if (get-properties (cdr initargs) '(:in))
+                             'in-clause
+                             'on-clause)
+         :var-spec initargs))
 
-(defmethod expand (var (action (eql :on-list)) &optional initform &rest initargs &key by &allow-other-keys)
-  (declare (ignore initargs))
-  (make-instance 'on-clause :var var :initform initform :by (or by #'cdr)))
+(defmethod bindings ((clause in-clause))
+  `((,(list-var clause) ,(in-form clause))))
 
-(defmethod bindings ((clause list-clause))
-  `((,(list-var clause) ,(initform clause))))
+(defmethod bindings ((clause on-clause))
+  `((,(list-var clause) ,(on-form clause))))
 
 (defmethod wrap-inner ((clause in-clause) form)
-  `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var clause) `(car ,(list-var clause)))
+  `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) `(car ,(list-var clause)))
      ,form))
 
 (defmethod wrap-inner ((clause on-clause) form)
-  `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var clause) (list-var clause))
+  `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) (list-var clause))
      ,form))
 
-(defmethod prologue ((clause list-clause))
+(defmethod prologue-forms ((clause list-clause))
   `((unless ,(list-var clause) (hoop-finish))))
 
-(defmethod epilogue ((clause list-clause))
-  `((setf ,(list-var clause) (funcall ,(by clause) ,(list-var clause)))))
+(defmethod epilogue-forms ((clause list-clause))
+  `((setf ,(list-var clause) (funcall ,(by-form clause) ,(list-var clause)))))
 
