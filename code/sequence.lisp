@@ -1,18 +1,13 @@
 (in-package #:hoop)
 
-(defclass sequence-clause (var-spec-slot initform-slot)
+(defclass sequence-clause (var-spec-slot in-form-slot by-slots)
   ((seq-var :reader seq-var
             :initform (gensym))
-   (by-var :reader by-var
-           :initform (gensym))
    (end-var :reader end-var
             :initform (gensym))
    (index :reader index
           :initarg :index
           :initform (gensym))
-   (by :reader by
-       :initarg :by
-       :initform 1)
    (start :reader start
           :initarg :start
           :initform 0)
@@ -20,13 +15,13 @@
         :initarg :end
         :initform nil)))
 
-(defmethod make-clause ((type (eql :in-seq)) &rest initargs)
+(defmethod make-clause ((type (eql :each-elt)) &rest initargs)
   (apply #'make-instance 'sequence-clause :var-spec initargs))
 
 (defmethod bindings ((clause sequence-clause))
-  `((,(seq-var clause) ,(initform clause))
+  `((,(seq-var clause) ,(in-form clause))
     (,(index clause) ,(start clause))
-    (,(by-var clause) ,(by clause))
+    (,(by-var clause) ,(by-form clause))
     ,@(when (end clause)
         `((,(end-var clause) ,(end clause))))))
 

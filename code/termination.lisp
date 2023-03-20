@@ -51,9 +51,8 @@
 (defmethod return-form ((clause never-clause))
   (values t t))
 
-(defclass thereis-clause (termination-clause)
-  ((temp-var :reader temp-var
-             :initform (gensym))))
+(defclass thereis-clause (termination-clause temp-var-slot)
+  ())
 
 (defmethod make-clause ((type (eql :thereis)) &rest initargs)
   (apply #'make-instance 'thereis-clause :test initargs))

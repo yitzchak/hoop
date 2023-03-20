@@ -47,9 +47,9 @@
              :initarg :var-spec
              :type (or symbol cons))))
 
-(defclass initform-slot ()
-  ((initform :accessor initform
-             :initarg :=)))
+(defclass equals-form-slot ()
+  ((equals :accessor equals-form
+           :initarg :=)))
 
 (defclass by-slots ()
   ((by-var :accessor by-var
@@ -73,11 +73,9 @@
   ((from-form :accessor from-form
             :initarg :from)))
 
-(defclass clause ()
-  ((var :reader var
-        :initarg :var)
-   (initform :reader initform
-             :initarg :initform)))
+(defclass temp-var-slot ()
+  ((temp-var :reader temp-var
+             :initform (gensym))))
 
 (defun symbol-macros-from-d-var-spec (var-spec form)
   (check-type var-spec (or symbol cons))

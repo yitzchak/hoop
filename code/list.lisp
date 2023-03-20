@@ -11,7 +11,7 @@
 (defclass on-clause (list-clause on-form-slot)
   ())
 
-(defmethod make-clause ((keyword (eql :for)) &rest initargs)
+(defmethod make-clause ((keyword (eql :each-item)) &rest initargs)
   (apply #'make-instance (if (get-properties (cdr initargs) '(:in))
                              'in-clause
                              'on-clause)

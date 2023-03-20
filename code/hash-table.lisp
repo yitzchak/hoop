@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defclass hash-table-clause (var-spec-slot initform-slot)
+(defclass hash-table-clause (var-spec-slot equals-form-slot)
   ((iterator-var :reader iterator-var
                  :initform (gensym))
    (successp-var :reader successp-var
@@ -21,11 +21,11 @@
   (when (listp (second (var-spec instance)))
     (setf (value-var instance) (gensym))))
 
-(defmethod make-clause ((type (eql :in-hash-table)) &rest initargs)
+(defmethod make-clause ((type (eql :each-key-value)) &rest initargs)
   (apply #'make-instance 'hash-table-clause :var-spec initargs))
 
 (defmethod wrap-outer ((clause hash-table-clause) form)
-  `(with-hash-table-iterator (,(iterator-var clause) ,(initform clause))
+  `(with-hash-table-iterator (,(iterator-var clause) ,(equals-form clause))
      ,form))
 
 (defmethod wrap-inner ((clause hash-table-clause) form)

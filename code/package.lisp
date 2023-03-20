@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defclass package-clause (var-spec-slot initform-slot)
+(defclass package-clause (var-spec-slot in-form-slot)
   ((symbol-types :reader symbol-types
                  :initform '(:external)
                  :initarg :symbol-types)
@@ -15,11 +15,11 @@
                 :initarg :package
                 :initform (gensym))))
 
-(defmethod make-clause ((type (eql :symbols)) &rest initargs)
+(defmethod make-clause ((type (eql :each-symbol)) &rest initargs)
   (apply #'make-instance 'package-clause :var-spec initargs))
 
 (defmethod wrap-outer ((clause package-clause) form)
-  `(with-package-iterator (,(iterator-var clause) ,(initform clause) ,@(symbol-types clause))
+  `(with-package-iterator (,(iterator-var clause) ,(in-form clause) ,@(symbol-types clause))
      ,form))
 
 (defmethod bindings ((clause package-clause))
