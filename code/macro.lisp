@@ -20,14 +20,14 @@
            (body-form `(macrolet ((hoop-finish ()
                                     (list 'go ',finish-tag)))
                          (tagbody
-                            ,repeat-tag
-                            ,.(mapcan #'prologue-forms clauses)
-                            ,.forms
-                            ,.(mapcan #'epilogue-forms clauses)
-                            (go ,repeat-tag)
-                            ,finish-tag
-                            ,.(mapcan #'finish-forms clauses)
-                            (return ,(find-first #'return-form clauses))))))
+                          ,repeat-tag
+                           ,.(mapcan #'prologue-forms clauses)
+                           ,.forms
+                           ,.(mapcan #'epilogue-forms clauses)
+                           (go ,repeat-tag)
+                          ,finish-tag
+                           ,.(mapcan #'finish-forms clauses)
+                           (return ,(find-first #'return-form clauses))))))
       `(block ,(find-first #'block-name clauses)
          (let* ,(mapcan #'bindings clauses)
            ,.declarations
