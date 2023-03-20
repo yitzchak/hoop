@@ -36,7 +36,8 @@
      ,form))
 
 (defmethod prologue-forms ((clause list-clause))
-  `((unless ,(list-var clause) (hoop-finish))))
+  `((when (endp ,(list-var clause))
+      (hoop-finish))))
 
 (defmethod epilogue-forms ((clause list-clause))
   `((setf ,(list-var clause) (funcall ,(by-var clause) ,(list-var clause)))))

@@ -51,6 +51,10 @@
   ((equals :accessor equals-form
            :initarg :=)))
 
+(defclass using-form-slot ()
+  ((using :accessor using-form
+          :initarg :using)))
+
 (defclass by-slots ()
   ((by-var :accessor by-var
            :initform (gensym))

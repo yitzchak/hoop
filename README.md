@@ -1,129 +1,122 @@
 # hoop
 
+## Step Clause
+
 ```lisp
-;; Print some numbers.
- (loop for i from 1 to 3
-       do (print i))
-; >>  1
-; >>  2
-; >>  3
-; =>  NIL
+(:step simple-var &key (from 0) to before (by 1))
 ```
 
-```lisp
-(hoop ((i :from 1 :to 3))
-      nil
-  (print i))
+* `:from` specifies the value from which stepping begins.
+* `:to` marks the end value for stepping.
+* `:before` marks the end value for stepping like `to` but iteration is
+  terminated before simple-var reaches the value.
+* `:by` marks the increment or decrement. If a negative value is used
+  then simple-var will be decremented.
+
+### Basic Examples
+
+```
+CL-USER> (hoop ((:step i :from 1 :to 3))
+           (print i))
+
+1 
+2 
+3 
+NIL
+CL-USER> (hoop ((:step i :from 10 :to 1 :by -3))
+           (print i))
+
+10 
+7 
+4 
+1 
+NIL
+CL-USER> (hoop ((:step i :before 3 :by -1))
+           (print i))
+NIL
+CL-USER> (hoop ((:step i :before 3))
+           (print i))
+
+0 
+1 
+2 
+NIL
 ```
 
+## List Clause
+
 ```lisp
-;; Print every third number.
- (loop for i from 10 downto 1 by 3
-       do (print i))
-; >>  10 
-; >>  7 
-; >>  4 
-; >>  1 
-; =>  NIL
+(:each-item d-var-spec &key in on (by #'cdr))
 ```
 
-```lisp
-(hoop ((i :from 10 :to 1 :by -3))
-      nil
-  (print i))
+Iterates over the contents of a list specifies by either `:in` or `:on`.
+
+* `:in` specifies the list form to iterate over. d-var-spec is applied
+  to the CAR of each list CONS.
+* `:on` specifies the list form to iterate over. d-var-spec is applied
+  to each list CONS.
+* `:by` specifies the function to advance the iteration.
+
+If d-var-spec is a CONS then destructuring happens in the same way as
+LOOP. Unlike LOOP this destructuring is done via symbol macros thereby
+making it possible to use SETF to update the list values.
+
+## Examples
+
+```
+CL-USER> (hoop ((:each-item i :in '(1 2 3)))
+           (print i))
+
+1 
+2 
+3 
+NIL
+CL-USER> (hoop ((:each-item i :in '(1 2 3 4 5) :by #'cddr))
+           (print i))
+
+1 
+3 
+5 
+NIL
+CL-USER> (hoop ((:each-item (i . x) :in '((A . 1) (B . 2) (C . 3)))
+                (:sum j))
+           (unless (eq i 'B)
+             (j x)))
+4
+CL-USER> (hoop ((:each-item sublist :on '(a b c d))
+                (:collect j))
+           (j sublist))
+((A B C D) (B C D) (C D) (D))
+CL-USER> (hoop ((:each-item (i) :on '(1 2 3)))
+           (print i))
+
+1 
+2 
+3 
+NIL
+CL-USER> (defparameter a (list 1 2 3 4 5))
+A
+CL-USER> (hoop ((:each-item i :in a))
+           (setf i (list i (if (oddp i) :odd :even))))
+NIL
+CL-USER> a
+((1 :ODD) (2 :EVEN) (3 :ODD) (4 :EVEN) (5 :ODD))
 ```
 
-```lisp
-;; Step incrementally from the default starting value.
- (loop for i below 3
-       do (print i))
-; >>  0
-; >>  1
-; >>  2
-; =>  NIL
-```
+# Generate Clause
+
+## Examples
 
 ```lisp
-(hoop ((i :from 0 :before 3))
-      nil
-  (print i))
+(:generate d-var-spec &key using then)
 ```
 
 
-6.1.2.1.2.1 Examples of for-as-in-list subclause
 
-```lisp
-;; Print every item in a list.
- (loop for item in '(1 2 3) do (print item))
->>  1
->>  2
->>  3
-=>  NIL
 ```
-
-```lisp
-(hoop ((item :in-list '(1 2 3)))
-      nil
-  (print item))
-```
-
-```lisp
-;; Print every other item in a list.
- (loop for item in '(1 2 3 4 5) by #'cddr
-       do (print item))
->>  1
->>  3
->>  5
-=>  NIL
-```
-
-```lisp
-(hoop ((item :in-list '(1 2 3 4 5)
-             :by #'cddr))
-      nil
-  (print item))
-```
-
-```lisp
-;; Destructure a list, and sum the x values using fixnum arithmetic.
- (loop for (item . x) of-type (t . fixnum) in '((A . 1) (B . 2) (C . 3))
-       unless (eq item 'B) sum x)
-=>  4
-```
-
-```lisp
-(hoop (((item . x) :in-list '((A . 1) (B . 2) (C . 3)))
-       (j := 0))
-      j
-  (unless (eq item 'B)
-    (incf j x)))
-```
-
-6.1.2.1.3.1 Examples of for-as-on-list subclause
-
-;; Collect successive tails of a list.
- (loop for sublist on '(a b c d)
-       collect sublist)
-=>  ((A B C D) (B C D) (C D) (D))
-
-```lisp
-(hoop ((sublist :on-list '(a b c d))
-       (c :into))
-      c
-  (c sublist))
-```
-
-;; Print a list by using destructuring with the loop keyword ON.
- (loop for (item) on '(1 2 3)
-       do (print item))
->>  1 
->>  2 
->>  3 
-=>  NIL
-
-
-```lisp
-(hoop (((item) :on-list '(1 2 3)))
-      nil
-  (print item))
+CL-USER> (hoop ((:generate i :using 1 :then (+ i 10))
+                (:step j :from 1 :to 5)
+                (:collect k))
+           (k i))
+(1 11 21 31 41)
 ```
