@@ -25,7 +25,7 @@
     ,@(when (end clause)
         `((,(end-var clause) ,(end clause))))))
 
-(defmethod wrap-inner ((clause sequence-clause) form)
+(defmethod wrap-form ((clause sequence-clause) form)
   `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) `(elt ,(seq-var clause) ,(index clause)))
      ,form))
 

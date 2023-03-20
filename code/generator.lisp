@@ -12,7 +12,7 @@
       `((,(temp-var clause) (multiple-value-list ,(equals-form clause))))
       `((,(var-spec clause) ,(equals-form clause)))))
 
-(defmethod wrap-inner ((clause generator-clause) form)
+(defmethod wrap-form ((clause generator-clause) form)
   (if (listp (var-spec clause))
       `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) (temp-var clause))
          ,form)

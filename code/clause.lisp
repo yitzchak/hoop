@@ -2,12 +2,7 @@
 
 (defgeneric make-clause (type &rest initargs))
 
-(defgeneric wrap-inner (clause form)
-  (:method (clause form)
-    (declare (ignore clause))
-    form))
-
-(defgeneric wrap-outer (clause form)
+(defgeneric wrap-form (clause form)
   (:method (clause form)
     (declare (ignore clause))
     form))

@@ -8,5 +8,4 @@
            #:hoop-finish
            #:make-clause
            #:prologue-form
-           #:wrap-inner
-           #:wrap-outer))
+           #:wrap-form))

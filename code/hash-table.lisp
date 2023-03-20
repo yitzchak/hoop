@@ -1,14 +1,14 @@
 (in-package #:hoop)
 
-(defclass hash-table-clause (var-spec-slot equals-form-slot)
+(defclass hash-table-clause (var-spec-slot in-form-slot temp-var-slot)
   ((iterator-var :reader iterator-var
                  :initform (gensym))
    (successp-var :reader successp-var
                  :initform (gensym))
-   (key-var :reader key-var
+   (key-var :accessor key-var
             :initarg :key-var
             :initform nil)
-   (value-var :reader value-var
+   (value-var :accessor value-var
               :initarg :value-var
               :initform nil)))
 
@@ -24,24 +24,22 @@
 (defmethod make-clause ((type (eql :each-key-value)) &rest initargs)
   (apply #'make-instance 'hash-table-clause :var-spec initargs))
 
-(defmethod wrap-outer ((clause hash-table-clause) form)
-  `(with-hash-table-iterator (,(iterator-var clause) ,(equals-form clause))
-     ,form))
-
-(defmethod wrap-inner ((clause hash-table-clause) form)
-  (if (or (key-var clause)
-          (value-var clause))
-      `(symbol-macrolet ,(nconc (when (key-var clause)
-                                  (symbol-macros-from-d-var-spec (first (var-spec clause))
-                                                                 (key-var clause)))
-                                (when (value-var clause)
-                                  (symbol-macros-from-d-var-spec (second (var-spec clause))
-                                                                 (value-var clause))))
-         ,form)
-      form))
+(defmethod wrap-form ((clause hash-table-clause) form)
+  `(with-hash-table-iterator (,(iterator-var clause) ,(temp-var clause))
+     ,(if (or (key-var clause)
+              (value-var clause))
+          `(symbol-macrolet (,.(when (key-var clause)
+                                 (symbol-macros-from-d-var-spec (first (var-spec clause))
+                                                                (key-var clause)))
+                             ,.(when (value-var clause)
+                                 (symbol-macros-from-d-var-spec (second (var-spec clause))
+                                                                (value-var clause))))
+             ,form)
+          form)))
 
 (defmethod bindings ((clause hash-table-clause))
-  `(,(or (key-var clause) (first (var-spec clause)))
+  `((,(temp-var clause) ,(in-form clause))
+    ,(or (key-var clause) (first (var-spec clause)))
     ,(or (value-var clause) (second (var-spec clause)))
     ,(successp-var clause)))
 

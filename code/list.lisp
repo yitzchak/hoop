@@ -3,7 +3,7 @@
 (defclass list-clause (var-spec-slot by-slots)
   ((list-var :reader list-var
              :initform (gensym)))
-  (:default-initargs :by #'cdr))
+  (:default-initargs :by '(function cdr)))
 
 (defclass in-clause (list-clause in-form-slot)
   ())
@@ -25,12 +25,12 @@
   `((,(list-var clause) ,(on-form clause))
     (,(by-var clause) ,(by-form clause))))
 
-(defmethod wrap-inner ((clause in-clause) form)
+(defmethod wrap-form ((clause in-clause) form)
   `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause)
                                                     `(car ,(list-var clause)))
      ,form))
 
-(defmethod wrap-inner ((clause on-clause) form)
+(defmethod wrap-form ((clause on-clause) form)
   `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause)
                                                     (list-var clause))
      ,form))

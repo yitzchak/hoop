@@ -15,7 +15,7 @@
 (defmethod bindings ((clause count-clause))  
   `((,(var-spec clause) 0)))
 
-(defmethod wrap-inner ((clause count-clause) form)
+(defmethod wrap-form ((clause count-clause) form)
   `(flet ((,(var-spec clause) (&rest args)
             (incf ,(var-spec clause) (length args))))
      ,form))
@@ -27,7 +27,7 @@
 (defmethod bindings ((clause narg-numeric-clause))  
   `((,(var-spec clause) ,(from-form clause))))
 
-(defmethod wrap-inner ((clause narg-numeric-clause) form)
+(defmethod wrap-form ((clause narg-numeric-clause) form)
   `(flet ((,(var-spec clause) (&rest args)
             (setf ,(var-spec clause)
                   (if ,(var-spec clause)

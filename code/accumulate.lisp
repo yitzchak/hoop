@@ -12,7 +12,7 @@
   `((,(var-spec clause) ,(into-form clause))
     (,(tail-var clause) (last ,(var-spec clause)))))
 
-(defmethod wrap-inner ((clause collect-clause) form)
+(defmethod wrap-form ((clause collect-clause) form)
   `(flet ((,(var-spec clause) (x &optional (method :collect))
             (check-type method
                         (member :collect :append :nconc))
