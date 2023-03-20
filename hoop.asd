@@ -12,6 +12,7 @@
          (:file "clause" :depends-on ("packages"))
          (:file "step" :depends-on ("clause"))
          (:file "list" :depends-on ("clause"))
+         (:file "named" :depends-on ("clause"))
          (:file "numeric" :depends-on ("clause"))
          (:file "return" :depends-on ("clause"))
          (:file "accumulate" :depends-on ("clause"))

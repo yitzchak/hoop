@@ -37,6 +37,11 @@
     (declare (ignore clause))
     (values nil nil)))
 
+(defgeneric block-name (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    (values nil nil)))
+
 (defclass var-spec-slot ()
   ((var-spec :accessor var-spec
              :initarg :var-spec

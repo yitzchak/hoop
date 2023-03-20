@@ -2,6 +2,7 @@
   (:use #:common-lisp)
   (:documentation "Common Lisp iteration")
   (:export #:bindings
+           #:block-name
            #:declarations
            #:epilogue-form
            #:hoop
