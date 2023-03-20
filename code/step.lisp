@@ -1,12 +1,10 @@
 (in-package #:hoop)
 
-(defclass step-clause (var-spec-slot from-form-slot by-form-slot)
+(defclass step-clause (var-spec-slot from-form-slot by-slots)
   ((to :reader to
        :initarg :to)
    (before :reader before
        :initarg :before)
-   (by-var :reader by-var
-           :initform (gensym))
    (to-var :reader to-var
            :initform (gensym)))
   (:default-initargs :by 1

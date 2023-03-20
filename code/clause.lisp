@@ -51,8 +51,10 @@
   ((initform :accessor initform
              :initarg :=)))
 
-(defclass by-form-slot ()
-  ((by-form :accessor by-form
+(defclass by-slots ()
+  ((by-var :accessor by-var
+           :initform (gensym))
+   (by-form :accessor by-form
             :initarg :by)))
 
 (defclass into-form-slot ()
