@@ -13,21 +13,20 @@
           :initform 0)
    (end :reader end
         :initarg :end
-        :initform nil)))
+        :initform nil))
+  (:default-initargs :by 1))
 
 (defmethod make-clause ((type (eql :each-elt)) &rest initargs)
   (apply #'make-instance 'sequence-clause :var-spec initargs))
 
-(defmethod bindings ((clause sequence-clause))
-  `((,(seq-var clause) ,(in-form clause))
-    (,(index clause) ,(start clause))
-    (,(by-var clause) ,(by-form clause))
-    ,@(when (end clause)
-        `((,(end-var clause) ,(end clause))))))
-
 (defmethod wrap-form ((clause sequence-clause) form)
-  `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) `(elt ,(seq-var clause) ,(index clause)))
-     ,form))
+  `(let ((,(seq-var clause) ,(in-form clause))
+         (,(index clause) ,(start clause))
+         (,(by-var clause) ,(by-form clause))
+         ,@(when (end clause)
+             `((,(end-var clause) ,(end clause)))))
+     (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) `(elt ,(seq-var clause) ,(index clause)))
+       ,form)))
 
 (defmethod prologue-forms ((clause sequence-clause))
   (if (end clause)

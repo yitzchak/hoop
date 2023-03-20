@@ -1,9 +1,7 @@
 (defpackage #:hoop
   (:use #:common-lisp)
   (:documentation "Common Lisp iteration")
-  (:export #:bindings
-           #:block-name
-           #:declarations
+  (:export #:block-name
            #:epilogue-form
            #:hoop
            #:hoop-finish

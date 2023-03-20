@@ -7,16 +7,6 @@
     (declare (ignore clause))
     form))
 
-(defgeneric bindings (clause)
-  (:method (clause)
-    (declare (ignore clause))
-    nil))
-
-(defgeneric declarations (clause)
-  (:method (clause)
-    (declare (ignore clause))
-    nil))
-
 (defgeneric prologue-forms (clause)
   (:method (clause)
     (declare (ignore clause))

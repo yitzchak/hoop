@@ -6,14 +6,11 @@
 (defmethod make-clause ((keyword (eql :with)) &rest initargs)
   (apply #'make-instance 'with-clause :var-spec initargs))
 
-(defmethod bindings ((clause with-clause))
-  (if (listp (var-spec clause))
-      `((,(temp-var clause) (multiple-value-list ,(equals-form clause))))
-      `((,(var-spec clause) ,(equals-form clause)))))
-
 (defmethod wrap-form ((clause with-clause) form)
   (if (listp (var-spec clause))
-      `(symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) (temp-var clause))
-         ,form)
-      form))
+      `(let ((,(temp-var clause) (multiple-value-list ,(equals-form clause))))
+         (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) (temp-var clause))
+           ,form))
+      `(let ((,(var-spec clause) ,(equals-form clause)))
+         ,form)))
 
