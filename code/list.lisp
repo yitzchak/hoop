@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defclass list-clause (var-spec-slot by-slots in-form-slot)
+(defclass list-clause (clause var-spec-slot by-slots in-form-slot)
   ((list-var :reader list-var
              :initform (gensym))
    (next-list-var :reader next-list-var
@@ -22,17 +22,19 @@
          :var-spec initargs))
 
 (defmethod wrap-form ((clause list-item-clause) form)
-  `(let ((,(next-list-var clause) ,(in-form clause))
-         (,(by-var clause) ,(by-form clause))
-         ,(list-var clause))
+  `(let (,(list-var clause)
+         ,@(assemble-in-order clause
+                              `(:in ((,(next-list-var clause) ,(in-form clause)))
+                                :by ((,(by-var clause) ,(by-form clause))))))
      (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause)
                                                       `(car ,(list-var clause)))
        ,form)))
 
 (defmethod wrap-form ((clause list-sublist-clause) form)
-  `(let ((,(next-list-var clause) ,(in-form clause))
-         (,(by-var clause) ,(by-form clause))
-         ,(list-var clause))
+  `(let (,(list-var clause)
+         ,@(assemble-in-order clause
+                              `(:in ((,(next-list-var clause) ,(in-form clause)))
+                                :by ((,(by-var clause) ,(by-form clause))))))
      (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause)
                                                       (list-var clause))
        ,form)))
