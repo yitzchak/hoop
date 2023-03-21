@@ -81,6 +81,20 @@
   ((temp-var :reader temp-var
              :initform (gensym))))
 
+(defclass binding-order-slot ()
+  ((binding-order :accessor binding-order
+                  :initform nil)))
+
+(defun calculate-binding-order (initargs &rest indicators)
+  (loop for indicator in initargs by #'cddr
+        when (member indicator indicators)
+          collect indicator))
+
+(defun make-bindings (order mapping)
+  (mapcar (lambda (indicator)
+            (getf mapping indicator))
+          order))
+
 (defun symbol-macros-from-d-var-spec (var-spec form)
   (check-type var-spec (or symbol cons))
   (cond ((null var-spec)
