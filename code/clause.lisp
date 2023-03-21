@@ -7,17 +7,27 @@
     (declare (ignore clause))
     form))
 
+(defgeneric termination-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
 (defgeneric prologue-forms (clause)
   (:method (clause)
     (declare (ignore clause))
     nil))
 
-(defgeneric epilogue-forms (clause)
+(defgeneric before-forms (clause)
   (:method (clause)
     (declare (ignore clause))
     nil))
 
-(defgeneric finish-forms (clause)
+(defgeneric after-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
+(defgeneric epilogue-forms (clause)
   (:method (clause)
     (declare (ignore clause))
     nil))

@@ -16,7 +16,7 @@
       `(let ((,(var-spec clause) ,(using-form clause)))
          ,form)))
 
-(defmethod epilogue-forms ((clause generator-clause))
+(defmethod after-forms ((clause generator-clause))
   (if (listp (var-spec clause))
       `((setq ,(temp-var clause)
               (multiple-value-list ,(if (slot-boundp clause 'then)

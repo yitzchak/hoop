@@ -10,7 +10,11 @@
             :initform nil)
    (value-var :accessor value-var
               :initarg :value-var
-              :initform nil)))
+              :initform nil)
+   (next-key-var :accessor next-key-var
+            :initform (gensym))
+   (next-value-var :accessor next-value-var
+              :initform (gensym))))
 
 (defmethod initialize-instance :after ((instance hash-table-clause) &rest initargs &key)
   (declare (ignore initargs))
@@ -28,22 +32,35 @@
   `(with-hash-table-iterator (,(iterator-var clause) ,(in-form clause))
      (let (,(or (key-var clause) (first (var-spec clause)))
            ,(or (value-var clause) (second (var-spec clause)))
-           ,(successp-var clause))
+           ,(successp-var clause)
+           ,(next-key-var clause)
+           ,(next-value-var clause))
+       (multiple-value-setq (,(successp-var clause)
+                             ,(next-key-var clause)
+                             ,(next-value-var clause))
+         (,(iterator-var clause)))
        ,(if (or (key-var clause)
                 (value-var clause))
             `(symbol-macrolet (,.(when (key-var clause)
                                    (symbol-macros-from-d-var-spec (first (var-spec clause))
                                                                   (key-var clause)))
-                                 ,.(when (value-var clause)
-                                     (symbol-macros-from-d-var-spec (second (var-spec clause))
-                                                                    (value-var clause))))
+                               ,.(when (value-var clause)
+                                   (symbol-macros-from-d-var-spec (second (var-spec clause))
+                                                                  (value-var clause))))
                ,form)
             form))))
 
-(defmethod prologue-forms ((clause hash-table-clause))
-  `((multiple-value-setq (,(successp-var clause)
-                          ,(or (key-var clause) (first (var-spec clause)))
-                          ,(or (value-var clause) (second (var-spec clause))))
-      (,(iterator-var clause)))
-    (unless ,(successp-var clause)
+(defmethod termination-forms ((clause hash-table-clause))
+  `((unless ,(successp-var clause)
       (hoop-finish))))
+
+(defmethod before-forms ((clause hash-table-clause))
+  `((setq ,(or (key-var clause) (first (var-spec clause))) ,(next-key-var clause)
+          ,(or (value-var clause) (second (var-spec clause))) ,(next-value-var clause))))
+
+(defmethod after-forms ((clause hash-table-clause))
+  `((multiple-value-setq (,(successp-var clause)
+                          ,(next-key-var clause)
+                          ,(next-value-var clause))
+      (,(iterator-var clause)))))
+  

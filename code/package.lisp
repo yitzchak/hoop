@@ -8,12 +8,18 @@
                  :initform (gensym))
    (successp-var :reader successp-var
                  :initform (gensym))
+   (next-symbol-var :reader next-symbol-var
+                    :initform (gensym))
+   (next-status-var :reader next-status-var
+                    :initform (gensym))
    (status-var :reader status-var
                :initarg :status
-               :initform (gensym))
+               :initform nil)
+   (next-package-var :reader next-package-var
+                     :initform (gensym))
    (package-var :reader package-var
                 :initarg :package
-                :initform (gensym))))
+                :initform nil)))
 
 (defmethod make-clause ((type (eql :each-symbol)) &rest initargs)
   (apply #'make-instance 'package-clause :var-spec initargs))
@@ -22,13 +28,35 @@
   `(with-package-iterator (,(iterator-var clause) ,(in-form clause) ,@(symbol-types clause))
      (let (,(var-spec clause)
            ,(successp-var clause)
-           ,(status-var clause)
-           ,(package-var clause))
+           ,(next-symbol-var clause)
+           ,(next-status-var clause)
+           ,(next-package-var clause)
+           ,.(when (status-var clause)
+               (list (status-var clause)))
+           ,.(when (package-var clause)
+               (list (package-var clause))))
+       (multiple-value-setq (,(successp-var clause)
+                             ,(next-symbol-var clause)
+                             ,(next-status-var clause)
+                             ,(next-package-var clause))
+         (,(iterator-var clause)))
        ,form)))
 
-(defmethod prologue-forms ((clause package-clause))
-  `((multiple-value-setq (,(successp-var clause) ,(var-spec clause)
-                          ,(status-var clause) ,(package-var clause))
-      (,(iterator-var clause)))
-    (unless ,(successp-var clause)
+(defmethod termination-forms ((clause package-clause))
+  `((unless ,(successp-var clause)
       (hoop-finish))))
+
+(defmethod before-forms ((clause package-clause))
+  `((setq ,@(when (var-spec clause)
+              (list (var-spec clause) (next-symbol-var clause)))
+          ,@(when (status-var clause)
+              (list (status-var clause) (next-status-var clause)))
+          ,@(when (package-var clause)
+              (list (package-var clause) (next-package-var clause))))))
+
+(defmethod after-forms ((clause package-clause))
+  `((multiple-value-setq (,(successp-var clause)
+                          ,(next-symbol-var clause)
+                          ,(next-status-var clause)
+                          ,(next-package-var clause))
+      (,(iterator-var clause)))))

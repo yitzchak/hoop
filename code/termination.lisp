@@ -10,7 +10,7 @@
 (defmethod make-clause ((type (eql :while)) &rest initargs)
   (apply #'make-instance 'while-clause :test initargs))
 
-(defmethod prologue-forms ((clause while-clause))
+(defmethod termination-forms ((clause while-clause))
   `((unless ,(test-form clause)
       (hoop-finish))))
 
@@ -21,7 +21,7 @@
 (defmethod make-clause ((type (eql :until)) &rest initargs)
   (apply #'make-instance 'until-clause :test initargs))
 
-(defmethod prologue-forms ((clause until-clause))
+(defmethod termination-forms ((clause until-clause))
   `((when ,(test-form clause)
       (hoop-finish))))
 
@@ -31,7 +31,7 @@
 (defmethod make-clause ((type (eql :always)) &rest initargs)
   (apply #'make-instance 'always-clause :test initargs))
 
-(defmethod prologue-forms ((clause always-clause))
+(defmethod termination-forms ((clause always-clause))
   `((unless ,(test-form clause)
       (return nil))))
 
@@ -44,7 +44,7 @@
 (defmethod make-clause ((type (eql :never)) &rest initargs)
   (apply #'make-instance 'never-clause :test initargs))
 
-(defmethod prologue-forms ((clause never-clause))
+(defmethod termination-forms ((clause never-clause))
   `((when ,(test-form clause)
       (return nil))))
 
@@ -57,7 +57,7 @@
 (defmethod make-clause ((type (eql :thereis)) &rest initargs)
   (apply #'make-instance 'thereis-clause :test initargs))
 
-(defmethod prologue-forms ((clause thereis-clause))
+(defmethod termination-forms ((clause thereis-clause))
   `((let ((,(temp-var clause) ,(test-form clause)))
       (when ,(temp-var clause)
         (return ,(temp-var clause))))))

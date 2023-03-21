@@ -1,5 +1,7 @@
 (in-package #:hoop)
 
+(defmacro hoop-next ())
+
 (defmacro hoop-finish ())
 
 (defun find-first (function clauses)
@@ -13,18 +15,24 @@
   (let* ((clauses (mapcar (lambda (args)
                             (apply #'make-clause args))
                           clauses))
-         (repeat-tag (gensym))
-         (finish-tag (gensym))
-         (body-form `(macrolet ((hoop-finish ()
-                                  (list 'go ',finish-tag)))
+         (before-tag (gensym))
+         (after-tag (gensym))
+         (epilogue-tag (gensym))
+         (body-form `(macrolet ((hoop-next ()
+                                  (list 'go ',after-tag))
+                                (hoop-finish ()
+                                  (list 'go ',epilogue-tag)))
                        (tagbody
-                        ,repeat-tag
                          ,.(mapcan #'prologue-forms clauses)
+                        ,before-tag
+                         ,.(mapcan #'termination-forms clauses)
+                         ,.(mapcan #'before-forms clauses)
                          ,@body
+                        ,after-tag  
+                         ,.(mapcan #'after-forms clauses)
+                         (go ,before-tag)
+                        ,epilogue-tag
                          ,.(mapcan #'epilogue-forms clauses)
-                         (go ,repeat-tag)
-                        ,finish-tag
-                         ,.(mapcan #'finish-forms clauses)
                          (return ,(find-first #'return-form clauses))))))
     `(block ,(find-first #'block-name clauses)
        ,(reduce #'wrap-form clauses

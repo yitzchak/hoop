@@ -13,6 +13,24 @@
 (defmethod prologue-forms ((clause prologue-clause))
   (forms clause))
 
+(defclass before-clause (execution-clause)
+  ())
+
+(defmethod make-clause ((type (eql :before)) &rest initargs)
+  (make-instance 'before-clause :forms initargs))
+
+(defmethod before-forms ((clause before-clause))
+  (forms clause))
+
+(defclass after-clause (execution-clause)
+  ())
+
+(defmethod make-clause ((type (eql :after)) &rest initargs)
+  (make-instance 'after-clause :forms initargs))
+
+(defmethod after-forms ((clause after-clause))
+  (forms clause))
+
 (defclass epilogue-clause (execution-clause)
   ())
 
@@ -20,14 +38,5 @@
   (make-instance 'epilogue-clause :forms initargs))
 
 (defmethod epilogue-forms ((clause epilogue-clause))
-  (forms clause))
-
-(defclass finish-clause (execution-clause)
-  ())
-
-(defmethod make-clause ((type (eql :finish)) &rest initargs)
-  (make-instance 'finish-clause :forms initargs))
-
-(defmethod finish-forms ((clause finish-clause))
   (forms clause))
 

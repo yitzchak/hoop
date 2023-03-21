@@ -1,7 +1,9 @@
 (in-package #:hoop)
 
 (defclass step-clause (var-spec-slot from-form-slot by-slots)
-  ((to :reader to
+  ((next-var :reader next-var
+             :initform (gensym))
+   (to :reader to
        :initarg :to)
    (before :reader before
        :initarg :before)
@@ -14,7 +16,8 @@
   (apply #'make-instance 'step-clause :var-spec initargs))
 
 (defmethod wrap-form ((clause step-clause) form)
-  `(let ((,(var-spec clause) ,(from-form clause))
+  `(let (,(var-spec clause)
+         (,(next-var clause) ,(from-form clause))
          (,(by-var clause) ,(by-form clause))
          ,@(when (slot-boundp clause 'to)
              `((,(to-var clause) ,(to clause))))
@@ -22,19 +25,22 @@
              `((,(to-var clause) ,(before clause)))))
      ,form))
 
-(defmethod prologue-forms ((clause step-clause))
+(defmethod termination-forms ((clause step-clause))
   (cond ((slot-boundp clause 'to)
          `((unless (or (and (plusp ,(by-var clause))
-                            (<= ,(var-spec clause) ,(to-var clause)))
+                            (<= ,(next-var clause) ,(to-var clause)))
                        (and (minusp ,(by-var clause))
-                            (>= ,(var-spec clause) ,(to-var clause))))
+                            (>= ,(next-var clause) ,(to-var clause))))
              (hoop-finish))))
         ((slot-boundp clause 'before)
          `((unless (or (and (plusp ,(by-var clause))
-                            (< ,(var-spec clause) ,(to-var clause)))
+                            (< ,(next-var clause) ,(to-var clause)))
                        (and (minusp ,(by-var clause))
-                            (> ,(var-spec clause) ,(to-var clause))))
+                            (> ,(next-var clause) ,(to-var clause))))
              (hoop-finish))))))
-        
-(defmethod epilogue-forms ((clause step-clause))
-  `((incf ,(var-spec clause) ,(by-var clause))))
+
+(defmethod before-forms ((clause step-clause))
+  `((setq ,(var-spec clause) ,(next-var clause))))
+
+(defmethod after-forms ((clause step-clause))
+  `((incf ,(next-var clause) ,(by-var clause))))

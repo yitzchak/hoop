@@ -5,6 +5,7 @@
   :version "0.1"
   :homepage "https://yitzchak.github.io/hoop/"
   :bug-tracker "https://github.com/yitzchak/hoop/issues"
+  :in-order-to ((asdf:test-op (asdf:test-op #:hoop/test)))
   :components
     ((:module code
       :components
@@ -24,3 +25,21 @@
          (:file "termination" :depends-on ("clause"))
          (:file "with" :depends-on ("clause"))
          (:file "macro" :depends-on ("clause"))))))
+
+(asdf:defsystem :hoop/test
+  :description "Test system for Hoop"
+  :license "MIT"
+  :license "MIT"
+  :version "0.1"
+  :homepage "https://yitzchak.github.io/hoop/"
+  :bug-tracker "https://github.com/yitzchak/hoop/issues"
+  :depends-on (:hoop :parachute)
+  :perform (asdf:test-op (op c)
+             (defparameter cl-user::*exit-on-test-failures* t)
+             (uiop:symbol-call :parachute :test :hoop/test))
+  :components ((:module code
+                :pathname "code/test/"
+                :serial t
+                :components ((:file "packages")
+                             (:file "test")
+                             (:file "hoop1")))))
