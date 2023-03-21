@@ -46,7 +46,7 @@ NIL
 ## List Item Clause
 
 ```lisp
-(:each-item d-var-spec &key in on (by #'cdr))
+(:each-item d-var-spec &key in (by #'cdr))
 ```
 
 Iterates over the contents of a list specifies by either `:in` or `:on`.
@@ -124,13 +124,21 @@ NIL
 
 # Generate Clause
 
-## Examples
-
 ```lisp
 (:generate d-var-spec &key using then)
 ```
 
+Initializes d-var-spec by setting it to the result of evaluating
+`using` on the first iteration, then setting it to the result of
+evaluating `then` on the second and subsequent iterations. If `:then`
+is omitted, the construct uses `using` on the second and subsequent
+iterations.
 
+If d-var-spec is a list then `multiple-value-setq` will be used to
+assign to the names in d-var-spec. Each item in this list will be
+treated as a separate d-var-spec.
+
+## Examples
 
 ```
 CL-USER> (hoop ((:generate i :using 1 :then (+ i 10))
@@ -147,4 +155,91 @@ CL-USER> (hoop ((:each-item i :in '(:fu :bar :wibble))
                      indicator value)))
 Found :FU with a value of 27
 Found :BAR with a value of 2
+```
+
+# Each Element Clause
+
+```lisp
+(:each-elt d-var-spec &key in by start end)
+```
+
+Uses `elt` to iterate over the elements of a sequence given by the
+`:in` key. The range of indicies and the stepping between successive
+indicies can be controlled with the `:start`, `:end` and `:by` keys.
+
+## Example
+
+```
+CL-USER> (hoop ((:each-elt i :in "abcd"))
+           (print i))
+
+#\a 
+#\b 
+#\c 
+#\d 
+NIL
+```
+
+# Each Key Value Clause
+
+```lisp
+(:each-key-value (d-var-spec d-var-spec) &key in)
+```
+
+Iterates over a hash table supplied by the `:in` key.
+
+# Examples
+
+```
+CL-USER> (defparameter a (make-hash-table))
+A
+CL-USER> (setf (gethash :fu a) 1)
+1 (1 bit, #x1, #o1, #b1)
+CL-USER> (setf (gethash :bar a) 2)
+2 (2 bits, #x2, #o2, #b10)
+CL-USER> (hoop ((:each-key-value (k v) :in a))
+           (format t "~s ~s~%" k v))
+:FU 1
+:BAR 2
+NIL
+CL-USER> (hoop ((:each-key-value (k nil) :in a))
+           (print k))
+
+:FU 
+:BAR 
+NIL
+```
+
+# Each Symbol Clause
+
+```lisp
+(:each-symbol simple-var &key in symbol-types package status)
+```
+
+# Examples
+
+```
+CL-USER> (make-package "FU")
+#<PACKAGE "FU">
+CL-USER> (intern "BAR" 'FU)
+FU::BAR
+NIL
+CL-USER> (export 'fu::bar 'fu)
+T
+CL-USER> (intern "QUUX" 'FU)
+FU::QUUX
+NIL
+CL-USER> (hoop ((:each-symbol s :in 'fu
+                 :package p :status stat
+                 :symbol-types (:external :internal)))
+           (format t "~s ~s ~s~%" s p stat))
+FU::QUUX #<PACKAGE "FU"> :INTERNAL
+FU:BAR #<PACKAGE "FU"> :EXTERNAL
+NIL
+```
+
+# With Clause
+
+```lisp
+(:with simple-var &key =)
 ```

@@ -19,7 +19,7 @@
   (apply #'make-instance 'package-clause :var-spec initargs))
 
 (defmethod wrap-form ((clause package-clause) form)
-  `(with-package-iterator (,(iterator-var clause) ,(in-var clause) ,@(symbol-types clause))
+  `(with-package-iterator (,(iterator-var clause) ,(in-form clause) ,@(symbol-types clause))
      (let (,(var-spec clause)
            ,(successp-var clause)
            ,(status-var clause)
