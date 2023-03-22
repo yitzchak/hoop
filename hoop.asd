@@ -24,7 +24,8 @@
          (:file "step" :depends-on ("clause"))
          (:file "termination" :depends-on ("clause"))
          (:file "with" :depends-on ("clause"))
-         (:file "macro" :depends-on ("clause"))))))
+         (:file "analysis" :depends-on ("clause"))
+         (:file "macro" :depends-on ("clause" "analysis"))))))
 
 (asdf:defsystem :hoop/test
   :description "Test system for Hoop"
@@ -42,5 +43,5 @@
                 :serial t
                 :components ((:file "packages")
                              (:file "test")
-                             (:file "hoop1")
-                             (:file "hoop2")))))
+                             (:file "hoop01")
+                             (:file "hoop02")))))

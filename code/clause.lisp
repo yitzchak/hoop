@@ -104,3 +104,16 @@
          (nconc (symbol-macros-from-d-var-spec (car var-spec) `(car ,form))
                 (symbol-macros-from-d-var-spec (cdr var-spec) `(cdr ,form))))))
 
+(defgeneric variable-names (object)
+  (:method (object)
+    (declare (ignore object))
+    nil)
+  (:method ((object symbol))
+    (when object
+      (list object)))
+  (:method ((object cons))
+    (nconc (variable-names (car object))
+           (variable-names (cdr object))))
+  (:method ((object var-spec-slot))
+    (variable-names (var-spec object))))
+

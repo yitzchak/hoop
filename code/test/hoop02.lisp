@@ -103,7 +103,7 @@
              (:collect c))
         (c (+ x y)))))
 
-#|(define-test hoop.2.14
+(define-test hoop.2.14
   :compile-at :execute
   (fail (hoop ((:each-item x :in '(a b c))
                (:each-item x :in '(d e f))
@@ -116,7 +116,7 @@
   (fail (hoop ((:each-item (x . x) :in '((a b) (c d)))
                (:collect c))
           (c x))
-        'program-error))|#
+        'program-error))
 
 (define-test hoop.2.16
   :compile-at :execute
