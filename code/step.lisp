@@ -28,14 +28,16 @@
          :var-spec initargs))
 
 (defmethod wrap-form ((clause step-clause) form)
-  `(let (,(var-spec clause)
+  `(let (,@(when (var-spec clause)
+             (list (var-spec clause)))
          ,@(assemble-in-order clause
                               `(:from ((,(next-var clause) ,(from-form clause)))
                                 :by ((,(by-var clause) ,(by-form clause))))))
      ,form))
 
 (defmethod wrap-form ((clause to-step-clause) form)
-  `(let (,(var-spec clause)
+  `(let (,@(when (var-spec clause)
+             (list (var-spec clause)))
          ,@(assemble-in-order clause
                               `(:from ((,(next-var clause) ,(from-form clause)))
                                 :by ((,(by-var clause) ,(by-form clause)))
@@ -43,7 +45,8 @@
      ,form))
 
 (defmethod wrap-form ((clause before-step-clause) form)
-  `(let (,(var-spec clause)
+  `(let (,@(when (var-spec clause)
+             (list (var-spec clause)))
          ,@(assemble-in-order clause
                               `(:from ((,(next-var clause) ,(from-form clause)))
                                 :by ((,(by-var clause) ,(by-form clause)))
@@ -65,7 +68,8 @@
       (hoop-finish))))
 
 (defmethod before-forms ((clause step-clause))
-  `((setq ,(var-spec clause) ,(next-var clause))))
+  (when (var-spec clause)
+    `((setq ,(var-spec clause) ,(next-var clause)))))
 
 (defmethod after-forms ((clause step-clause))
   `((incf ,(next-var clause) ,(by-var clause))))

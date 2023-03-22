@@ -229,107 +229,158 @@
              (:collect c))
         (c x))))
 
-#|(define-test hoop.1.29
-  (let (a b c (i 0))
-    (values
-     (hoop ((:step x :from (progn (setq a (incf i)) 0)
-           below (progn (setq b (incf i)) 9)
-           :by (progn (setq c (incf i)) 2)
-           collect x)
-     a b c i))
-  (0 2 4 6 8)
-  1 2 3 3)
+(define-test hoop.1.29
+  :compile-at :execute
+  (is-values (let (a b c (i 0))
+               (values (hoop ((:step x :from (progn (setq a (incf i)) 0)
+                               :before (progn (setq b (incf i)) 9)
+                               :by (progn (setq c (incf i)) 2))
+                              (:collect c))
+                         (c x))
+                       a b c i))
+             (equal '(0 2 4 6 8))
+             (equal 1)
+             (equal 2)
+             (equal 3)
+             (equal 3)))
 
 (define-test hoop.1.30
-  (let (a b c (i 0))
-    (values
-     (hoop ((:step x :from (progn (setq a (incf i)) 0)
-           :by (progn (setq c (incf i)) 2)
-           below (progn (setq b (incf i)) 9)
-           collect x)
-     a b c i))
-  (0 2 4 6 8)
-  1 3 2 3)
+  :compile-at :execute
+  (is-values (let (a b c (i 0))
+               (values (hoop ((:step x :from (progn (setq a (incf i)) 0)
+                               :by (progn (setq c (incf i)) 2)
+                               :before (progn (setq b (incf i)) 9))
+                              (:collect c))
+                         (c x))
+                       a b c i))
+             (equal '(0 2 4 6 8))
+             (equal 1)
+             (equal 3)
+             (equal 2)
+             (equal 3)))
 
 (define-test hoop.1.31
-  (let (a b c (i 0))
-    (values
-     (hoop ((:step x
-           below (progn (setq b (incf i)) 9)
-           :by (progn (setq c (incf i)) 2)
-           :from (progn (setq a (incf i)) 0)
-           collect x)
-     a b c i))
-  (0 2 4 6 8)
-  3 1 2 3)
+  :compile-at :execute
+  (is-values (let (a b c (i 0))
+               (values (hoop ((:step x
+                               :before (progn (setq b (incf i)) 9)
+                               :by (progn (setq c (incf i)) 2)
+                               :from (progn (setq a (incf i)) 0))
+                              (:collect c))
+                         (c x))
+                       a b c i))
+             (equal '(0 2 4 6 8))
+             (equal 3)
+             (equal 1)
+             (equal 2)
+             (equal 3)))
 
 (define-test hoop.1.32
-  (let (a b c (i 0))
-    (values
-     (hoop ((:step x
-           :by (progn (setq c (incf i)) 2)
-           below (progn (setq b (incf i)) 9)
-           :from (progn (setq a (incf i)) 0)
-           collect x)
-     a b c i))
-  (0 2 4 6 8)
-  3 2 1 3)
+  :compile-at :execute
+  (is-values (let (a b c (i 0))
+               (values (hoop ((:step x
+                               :by (progn (setq c (incf i)) 2)
+                               :before (progn (setq b (incf i)) 9)
+                               :from (progn (setq a (incf i)) 0))
+                              (:collect c))
+                         (c x))
+                       a b c i))
+             (equal '(0 2 4 6 8))
+             (equal 3)
+             (equal 2)
+             (equal 1)
+             (equal 3)))
 
 (define-test hoop.1.33
-  (hoop ((:step x :from 1 upto 5 collect x)
-  (1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (hoop ((:step x :from 1 :to 5)
+             (:collect c))
+        (c x))))
 
 (define-test hoop.1.34
-  (hoop ((:step x :from 1 :to 4.0 collect x)
-  (1 2 3 4))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4)
+      (hoop ((:step x :from 1 :to 4.0)
+             (:collect c))
+        (c x))))
 
 (define-test hoop.1.35
-  (hoop ((:step x below 5 collect x)
-  (0 1 2 3 4))
+  :compile-at :execute
+  (is equal
+      '(0 1 2 3 4)
+      (hoop ((:step x :before 5)
+             (:collect c))
+        (c x))))
 
 (define-test hoop.1.36
-  (hoop ((:step x below 20 :by 3 collect x)
-  (0 3 6 9 12 15 18))
+  :compile-at :execute
+  (is equal
+      '(0 3 6 9 12 15 18)
+      (hoop ((:step x :before 20 :by 3)
+             (:collect c))
+        (c x))))
 
 (define-test hoop.1.37
-  (hoop ((:step x :by 3 below 20 collect x)
-  (0 3 6 9 12 15 18))
+  :compile-at :execute
+  (is equal
+      '(0 3 6 9 12 15 18)
+      (hoop ((:step x :by 3 :before 20)
+             (:collect c))
+        (c x))))
 
 (define-test hoop.1.38
-  (hoop ((:step x of-type fixnum :from 1 :to 5 collect x)
-  (1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (hoop ((:step x #|of-type fixnum|# :from 1 :to 5)
+             (:collect c))
+        (c x))))
 
 ;;; The following provides an example where an incorrect
 ;;; implementation will assign X an out-of-range value
 ;;; at the end.
 (define-test hoop.1.39
-  :notes (:hoop-iteration-values-in-finally :ansi-spec-problem)
-  (hoop ((:step x of-type (integer 1 5) :from 1 :to 5 collect x)
-  (1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (hoop ((:step x #|of-type (integer 1 5)|# :from 1 :to 5)
+             (:collect c))
+        (c x))))
 
 ;;; Test that the index variable achieves the inclusive
 ;;; upper bound, but does not exceed it.
 (define-test hoop.1.40
-  :notes (:hoop-iteration-values-in-finally :ansi-spec-problem)
-  (hoop ((:step x :from 1 :to 5 do (progn) finally (return x))
-  5)
+  :compile-at :execute
+  (is equal
+      5
+      (hoop ((:step x :from 1 :to 5)
+             (:epilogue (return x))))))
 
-;;; Test that the index variable acheives the exclusive
+;;; Test that the index variable achieves the exclusive
 ;;; upper bound, but does not exceed it.
 (define-test hoop.1.41
-  :notes (:hoop-iteration-values-in-finally :ansi-spec-problem)
-  (hoop ((:step x :from 1 below 5 do (progn) finally (return x))
-  4)
+  :compile-at :execute
+  (is equal
+      4
+      (hoop ((:step x :from 1 :before 5)
+             (:epilogue (return x))))))
 
 (define-test hoop.1.42
-  :notes (:hoop-iteration-values-in-finally :ansi-spec-problem)
-  (hoop ((:step x :from 10 downto 0 do (progn) finally (return x))
-  0)
+  :compile-at :execute
+  (is equal
+      0
+      (hoop ((:step x :from 10 :to 0 :by -1)
+             (:epilogue (return x))))))
 
 (define-test hoop.1.43
-  :notes (:hoop-iteration-values-in-finally :ansi-spec-problem)
-  (hoop ((:step x :from 10 above 0 do (progn) finally (return x))
-  1)
+  :compile-at :execute
+  (is equal
+      1
+      (hoop ((:step x :from 10 :before 0 :by -1)
+             (:epilogue (return x))))))
 
 ;;; The arithmetic hoop ((:stepm says the types are numbers, not
 ;;; reals, so arguably they should work on complexes (which are
@@ -337,71 +388,130 @@
 ;;; but a clause without termination should work just fine.
 
 (define-test hoop.1.44
-  (hoop ((:step i :from 1 :to 5 ((:step c :from #c(0 1) collect c)
-  (#c(0 1) #c(1 1) #c(2 1) #c(3 1) #c(4 1)))
+  :compile-at :execute
+  (is equal
+      '(#c(0 1) #c(1 1) #c(2 1) #c(3 1) #c(4 1))
+      (hoop ((:step i :from 1 :to 5)
+             (:step c :from #c(0 1))
+             (:collect d))
+        (d c))))
 
 (define-test hoop.1.45
-  (hoop ((:step i :from 1 :to 5 ((:step c :from #c(0 1) :by 2 collect c)
-  (#c(0 1) #c(2 1) #c(4 1) #c(6 1) #c(8 1)))
+  :compile-at :execute
+  (is equal
+        '(#c(0 1) #c(2 1) #c(4 1) #c(6 1) #c(8 1))
+      (hoop ((:step i :from 1 :to 5)
+             (:step c :from #c(0 1) :by 2)
+             (:collect d))
+        (d c))))
 
 (define-test hoop.1.46
-  (hoop ((:step i :from 1 :to 5 ((:step c down:from #c(5 1) collect c)
-  (#c(5 1) #c(4 1) #c(3 1) #c(2 1) #c(1 1)))
+  :compile-at :execute
+  (is equal
+      '(#c(5 1) #c(4 1) #c(3 1) #c(2 1) #c(1 1))
+      (hoop ((:step i :from 1 :to 5)
+             (:step c :from #c(5 1) :by -1)
+             (:collect d))
+        (d c))))
 
 (define-test hoop.1.47
-  (hoop ((:step i :from 1 :to 5 ((:step c down:from #c(10 1) :by 2 collect c)
-  (#c(10 1) #c(8 1) #c(6 1) #c(4 1) #c(2 1)))
+  :compile-at :execute
+  (is equal
+      '(#c(10 1) #c(8 1) #c(6 1) #c(4 1) #c(2 1))
+      (hoop ((:step i :from 1 :to 5)
+             (:step c :from #c(10 1) :by -2)
+             (:collect d))
+        (d c))))
 
 (define-test hoop.1.48
-  (hoop ((:step i :from 1 :to 5 ((:step c up:from #c(0 1) collect c)
-  (#c(0 1) #c(1 1) #c(2 1) #c(3 1) #c(4 1)))
+  :compile-at :execute
+  (is equal
+      '(#c(0 1) #c(1 1) #c(2 1) #c(3 1) #c(4 1))
+      (hoop ((:step i :from 1 :to 5)
+             (:step c :from #c(0 1))
+             (:collect d))
+        (d c))))
 
 (define-test hoop.1.49
-  (hoop ((:step i :from 1 :to 5 ((:step c up:from #c(0 1) :by 2 collect c)
-  (#c(0 1) #c(2 1) #c(4 1) #c(6 1) #c(8 1)))
+  :compile-at :execute
+  (is equal
+      '(#c(0 1) #c(2 1) #c(4 1) #c(6 1) #c(8 1))
+      (hoop ((:step i :from 1 :to 5)
+             (:step c :from #c(0 1) :by 2)
+             (:collect d))
+        (d c))))
 
 ;;; The variable in the hoop ((:step-as-arithmetic clause
 ;;; can be a d-var-spec, so 'NIL' should mean don't bind anything
 
 (define-test hoop.1.50
-  (let ((i 0))
-    (hoop ((:step nil :from 10 :to 15 collect (incf i)))
-  (1 2 3 4 5 6))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5 6)
+      (let ((i 0))
+        (hoop ((:step nil :from 10 :to 15)
+               (:collect c))
+          (c (incf i))))))
 
 (define-test hoop.1.51
-  (let ((i 0))
-    (hoop ((:step nil :from 10 below 15 collect (incf i)))
-  (1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (let ((i 0))
+        (hoop ((:step nil :from 10 :before 15)
+               (:collect c))
+          (c (incf i))))))
 
 (define-test hoop.1.52
-  (hoop ((:step nil :from 10 :to 0 collect 'a)
-  nil)
+  :compile-at :execute
+  (is equal
+      nil
+      (hoop ((:step nil :from 10 :to 0)
+             (:collect c))
+        (c 'a))))
 
 (define-test hoop.1.53
-  (let ((i 0))
-    (hoop ((:step nil :from 0 :to 10 :by 2 collect (incf i)))
-  (1 2 3 4 5 6))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5 6)
+      (let ((i 0))
+        (hoop ((:step nil :from 0 :to 10 :by 2)
+               (:collect c))
+          (c (incf i))))))
 
 (define-test hoop.1.54
-  (let ((i 0))
-    (hoop ((:step nil :from 1 :to 4
-          ((:step nil :from 1 :to 10 collect (incf i)))
-  (1 2 3 4))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4)
+      (let ((i 0))
+        (hoop ((:step nil :from 1 :to 4)
+               (:step nil :from 1 :to 10)
+               (:collect c))
+          (c (incf i))))))
 
 (define-test hoop.1.55
-  (let ((i 0))
-    (hoop ((:step nil :from 5 downto 0 collect (incf i)))
-  (1 2 3 4 5 6))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5 6)
+      (let ((i 0))
+        (hoop ((:step nil :from 5 :to 0 :by -1)
+               
+               (:collect c))
+          (c (incf i))))))
 
 (define-test hoop.1.56
-  (let ((i 0))
-    (hoop ((:step nil :from 5 above 0 collect (incf i)))
-  (1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (let ((i 0))
+        (hoop ((:step nil :from 5 :before 0 :by -1)
+               (:collect c))
+          (c (incf i))))))
 
 ;;; Test that explicit calls :to macroexpand in subforms
 ;;; are done in the correct environment
 
-(define-test hoop.1.57
+#|(define-test hoop.1.57
   (macrolet
    ((%m (z) z))
    (hoop ((:step i :from (expand-in-current-env (%m 1)) :to 5 collect i))
