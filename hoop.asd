@@ -42,4 +42,5 @@
                 :serial t
                 :components ((:file "packages")
                              (:file "test")
-                             (:file "hoop1")))))
+                             (:file "hoop1")
+                             (:file "hoop2")))))
