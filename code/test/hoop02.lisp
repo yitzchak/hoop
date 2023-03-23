@@ -105,17 +105,17 @@
 
 (define-test hoop.2.14
   :compile-at :execute
-  (fail (hoop ((:each-item x :in '(a b c))
-               (:each-item x :in '(d e f))
-               (:collect c))
-          (c x))
+  (fail (macroexpand-1 '(hoop ((:each-item x :in '(a b c))
+                               (:each-item x :in '(d e f))
+                               (:collect c))
+                          (c x)))
         'program-error))
 
 (define-test hoop.2.15
   :compile-at :execute
-  (fail (hoop ((:each-item (x . x) :in '((a b) (c d)))
-               (:collect c))
-          (c x))
+  (fail (macroexpand-1 '(hoop ((:each-item (x . x) :in '((a b) (c d)))
+                               (:collect c))
+                          (c x)))
         'program-error))
 
 (define-test hoop.2.16
