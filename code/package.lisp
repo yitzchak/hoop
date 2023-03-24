@@ -19,14 +19,16 @@
                      :initform (gensym))
    (package-var :reader package-var
                 :initarg :package
-                :initform nil)))
+                :initform nil))
+  (:default-initargs :in '*package*))
 
 (defmethod make-clause ((type (eql :each-symbol)) &rest initargs)
   (apply #'make-instance 'package-clause :var-spec initargs))
 
 (defmethod wrap-form ((clause package-clause) form)
   `(with-package-iterator (,(iterator-var clause) ,(in-form clause) ,@(symbol-types clause))
-     (let (,(var-spec clause)
+     (let (,.(when (var-spec clause)
+               (list (var-spec clause)))
            ,(successp-var clause)
            ,(next-symbol-var clause)
            ,(next-status-var clause)

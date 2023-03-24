@@ -94,15 +94,15 @@
             (getf mapping indicator))
           (initargs-order clause)))
 
-(defun symbol-macros-from-d-var-spec (var-spec form)
+(defun bindings-from-d-var-spec (var-spec &optional form)
   (check-type var-spec (or symbol cons))
   (cond ((null var-spec)
          nil)
         ((symbolp var-spec)
          `((,var-spec ,form)))
         (t
-         (nconc (symbol-macros-from-d-var-spec (car var-spec) `(car ,form))
-                (symbol-macros-from-d-var-spec (cdr var-spec) `(cdr ,form))))))
+         (nconc (bindings-from-d-var-spec (car var-spec) `(car ,form))
+                (bindings-from-d-var-spec (cdr var-spec) `(cdr ,form))))))
 
 (defgeneric variable-names (object)
   (:method (object)

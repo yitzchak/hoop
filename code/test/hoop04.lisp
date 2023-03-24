@@ -1,103 +1,111 @@
 (in-package #:hoop/test)
 
-#|
-(deftest loop.4.1
-  (loop
-   for x = 1 then (1+ x)
-   until (> x 5)
-   collect x)
-  (1 2 3 4 5))
+(define-test hoop.4.1
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (hoop ((:generate x :using 1 :then (1+ x))
+             (:until (> x 5))
+             (:collect c))
+        (c x))))
 
-(deftest loop.4.2
-  (loop
-   for i from 1 to 10
-   for j = (1+ i) collect j)
-  (2 3 4 5 6 7 8 9 10 11))
+(define-test hoop.4.2
+  :compile-at :execute
+  (is equal
+      '(2 3 4 5 6 7 8 9 10 11)
+      (hoop ((:step i :from 1 :to 10)
+             (:generate j :using (1+ i))
+             (:collect c))
+        (c j))))
 
-(deftest loop.4.3
-  (loop
-   for i from 1 to 10
-   for j of-type integer = (1+ i) collect j)
-  (2 3 4 5 6 7 8 9 10 11))
+(define-test hoop.4.4
+  :compile-at :execute
+  (is equal
+      '(a b c d e)
+      (hoop ((:each-sublist e :in '(a b c d e))
+             (:generate ((x . y)) :using e)
+             (:collect c))
+        (c x))))
 
-(deftest loop.4.4
-  (loop for e on '(a b c d e)
-        for (x . y) = e
-        collect x)
-  (a b c d e))
-
-(deftest loop.4.5
-  (loop for (x . y) = '(a b c d e) then y
-        while x
-        collect x)
-  (a b c d e))
+(define-test hoop.4.5
+  :compile-at :execute
+  (is equal
+      '(a b c d e)
+      (hoop ((:generate ((x . y)) :using '(a b c d e) :then y)
+             (:while x)
+             (:collect c))
+        (c x))))
 
 ;;; Error cases
 
-(deftest loop.4.6
-  (signals-error
-   (loop for (x . x) = '(nil nil nil)
-         until x count t)
-   program-error)
-  t)
+(define-test hoop.4.6
+  :compile-at :execute
+  (fail-compile (hoop ((:generate (x . x) :using '(nil nil nil))
+                       (:until x)
+                       (:count c))
+                  (c t))
+                program-error))
 
-(deftest loop.4.7
-  (signals-error
-   (macroexpand '(loop for (x . x) = '(nil nil nil)
-                       until x count t))
-   program-error)
-  t)
+(define-test hoop.4.7
+  :compile-at :execute
+  (fail (macroexpand '(hoop ((:generate (x . x) :using '(nil nil nil))
+                             (:until x)
+                             (:count c))
+                       (c t)))
+        program-error))
 
-(deftest loop.4.8
-  (signals-error
-   (macroexpand '(loop for x = '(nil nil nil)
-                       for x = 1 count x until t))
-   program-error)
-  t)
+(define-test hoop.4.8
+  :compile-at :execute
+  (fail (macroexpand '(hoop ((:generate c :using '(nil nil nil))
+                             (:generate x :using 1)
+                             (:count c)
+                             (:until t))
+                       (c t)))
+        program-error))
 
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-(deftest loop.4.9
+#|(define-test hoop.4.9
   (macrolet
    ((%m (z) z))
-   (loop
+   (hoop
     for x = (expand-in-current-env (%m 1)) then (1+ x)
     until (> x 5)
     collect x))
   (1 2 3 4 5))
 
-(deftest loop.4.10
+(define-test hoop.4.10
   (macrolet
    ((%m (z) z))
-   (loop
+   (hoop
     for x = 1 then (expand-in-current-env (%m (1+ x)))
     until (> x 5)
     collect x))
   (1 2 3 4 5))
 
-(deftest loop.4.11
+(define-test hoop.4.11
   (macrolet
    ((%m (z) z))
-   (loop
+   (hoop
     for x = 1 then (1+ x)
     until (expand-in-current-env (%m (> x 5)))
     collect x))
   (1 2 3 4 5))
 
-(deftest loop.4.12
+(define-test hoop.4.12
   (macrolet
    ((%m (z) z))
-   (loop
+   (hoop
     for x = 1 then (1+ x)
     while (expand-in-current-env (%m (<= x 5)))
     collect x))
   (1 2 3 4 5))
 
-(deftest loop.4.13
+(define-test hoop.4.13
   (macrolet
    ((%m (z) z))
-   (loop
+   (hoop
     for x = 1 then (1+ x)
     until (> x 5)
     collect (expand-in-current-env (%m x))))

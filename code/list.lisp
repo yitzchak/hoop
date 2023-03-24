@@ -26,7 +26,7 @@
          ,@(assemble-in-order clause
                               `(:in ((,(next-list-var clause) ,(in-form clause)))
                                 :by ((,(by-var clause) ,(by-form clause))))))
-     (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause)
+     (symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
                                                       `(car ,(list-var clause)))
        ,form)))
 
@@ -35,8 +35,8 @@
          ,@(assemble-in-order clause
                               `(:in ((,(next-list-var clause) ,(in-form clause)))
                                 :by ((,(by-var clause) ,(by-form clause))))))
-     (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause)
-                                                      (list-var clause))
+     (symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                                 (list-var clause))
        ,form)))
 
 (defmethod termination-forms ((clause list-clause))

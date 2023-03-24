@@ -28,7 +28,8 @@
                                 :start ((,(next-index clause) ,(start clause)))
                                 :by ((,(by-var clause) ,(by-form clause)))
                                 :end ((,(end-var clause) ,(end clause))))))
-     (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) `(elt ,(seq-var clause) ,(index clause)))
+     (symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                                 `(elt ,(seq-var clause) ,(index clause)))
        ,form)))
 
 (defmethod termination-forms ((clause sequence-clause))

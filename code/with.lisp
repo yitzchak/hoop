@@ -8,9 +8,10 @@
 
 (defmethod wrap-form ((clause with-clause) form)
   (if (listp (var-spec clause))
-      `(let ((,(temp-var clause) (multiple-value-list ,(equals-form clause))))
-         (symbol-macrolet ,(symbol-macros-from-d-var-spec (var-spec clause) (temp-var clause))
-           ,form))
+      `(let* ((,(temp-var clause) (multiple-value-list ,(equals-form clause)))
+              ,.(bindings-from-d-var-spec (var-spec clause)
+                                          (temp-var clause)))
+         ,form)
       `(let ((,(var-spec clause) ,(equals-form clause)))
          ,form)))
 
