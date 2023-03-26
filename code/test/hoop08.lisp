@@ -29,9 +29,9 @@
   (is equal
       '(1 (nil) (nil))
       (let (a b)
-        (hoop ((:with a := 1
-                :and b := (list a)
-                :and c := (list b)))
+        (hoop ((:parallel (:with a := 1)
+                          (:with b := (list a))
+                          (:with c := (list b))))
           (return (list a b c))))))
 
 ;;; type specs

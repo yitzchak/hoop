@@ -13,7 +13,7 @@
 
 (defmacro hoop (clauses &body body)
   (let ((clauses (mapcar (lambda (args)
-                           (apply #'make-clause args))
+                           (apply #'make-clause nil args))
                          clauses)))
     (analyze clauses)
     (let* ((before-tag (gensym))
@@ -25,16 +25,18 @@
                                     (list 'go ',epilogue-tag)))
                          (tagbody
                             ,.(mapcan #'prologue-forms clauses)
-                            ,before-tag
+                          ,before-tag
                             ,.(mapcan #'termination-forms clauses)
                             ,.(mapcan #'before-forms clauses)
                             ,@body
-                            ,after-tag  
+                          ,after-tag  
                             ,.(mapcan #'after-forms clauses)
                             (go ,before-tag)
-                            ,epilogue-tag
+                          ,epilogue-tag
                             ,.(mapcan #'epilogue-forms clauses)
                             (return ,(find-first #'return-form clauses))))))
       `(block ,(find-first #'block-name clauses)
-         ,(reduce #'wrap-form clauses
-                  :from-end t :initial-value body-form)))))
+         ,(reduce #'wrap-outer-form clauses
+                  :from-end t
+                  :initial-value (reduce #'wrap-inner-form clauses
+                                         :from-end t :initial-value body-form))))))

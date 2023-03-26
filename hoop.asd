@@ -40,10 +40,13 @@
           :depends-on ("clause"))
          (:file "with"
           :depends-on ("clause"))
+         (:file "order"
+          :depends-on ("clause"))
          (:file "analysis"
           :depends-on ("clause"))
          (:file "macro"
-          :depends-on ("clause" "analysis"))))))
+          :depends-on ("clause"
+                       "analysis"))))))
 
 (asdf:defsystem :hoop/test
   :description "Test system for Hoop"

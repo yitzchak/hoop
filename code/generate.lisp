@@ -5,17 +5,17 @@
 
 (defclass generate-then-clause (generate-clause)
   ((then-form :accessor then-form
-              :initarg :then)
+              :initarg :then)))
    (use-then-var :accessor use-then-var
                  :initform (gensym))))
 
-(defmethod make-clause ((type (eql :generate)) &rest initargs)
+(defmethod make-clause (parallel (type (eql :generate)) &rest initargs)
   (apply #'make-instance (if (get-properties (cdr initargs) '(:then))
                              'generate-then-clause
                              'generate-clause)
          :var-spec initargs))
 
-(defmethod wrap-form ((clause generate-clause) form)
+(defmethod wrap-outer-form ((clause generate-clause) form)
   (if (listp (var-spec clause))
       `(let (,(temp-var clause)
              ,.(mapcar #'first (bindings-from-d-var-spec (var-spec clause))))
@@ -23,7 +23,7 @@
       `(let (,(var-spec clause))
          ,form)))
 
-(defmethod wrap-form ((clause generate-then-clause) form)
+(defmethod wrap-outer-form ((clause generate-then-clause) form)
   (if (listp (var-spec clause))
       `(let (,(use-then-var clause)
              ,(temp-var clause)

@@ -1,45 +1,50 @@
 (in-package #:hoop)
 
-(defgeneric make-clause (type &rest initargs))
+(defgeneric make-clause (parallel type &rest initargs))
 
-(defgeneric wrap-form (clause form)
+(defgeneric wrap-outer-form (clause form)
   (:method (clause form)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
+    form))
+
+(defgeneric wrap-inner-form (clause form)
+  (:method (clause form)
+    (declare (ignore clause parallel))
     form))
 
 (defgeneric termination-forms (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     nil))
 
 (defgeneric prologue-forms (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     nil))
 
 (defgeneric before-forms (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     nil))
 
 (defgeneric after-forms (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     nil))
 
 (defgeneric epilogue-forms (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     nil))
 
 (defgeneric return-form (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     (values nil nil)))
 
 (defgeneric block-name (clause)
   (:method (clause)
-    (declare (ignore clause))
+    (declare (ignore clause parallel))
     (values nil nil)))
 
 (defclass var-spec-slot ()

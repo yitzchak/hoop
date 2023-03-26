@@ -11,4 +11,4 @@
            #:hoop-next
            #:make-clause
            #:prologue-forms
-           #:wrap-form))
+           #:wrap-outer-form))

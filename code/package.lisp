@@ -22,10 +22,10 @@
                 :initform nil))
   (:default-initargs :in '*package*))
 
-(defmethod make-clause ((type (eql :each-symbol)) &rest initargs)
+(defmethod make-clause (parallel (type (eql :each-symbol)) &rest initargs)
   (apply #'make-instance 'package-clause :var-spec initargs))
 
-(defmethod wrap-form ((clause package-clause) form)
+(defmethod wrap-outer-form ((clause package-clause) form)
   `(with-package-iterator (,(iterator-var clause) ,(in-form clause) ,@(symbol-types clause))
      (let (,.(when (var-spec clause)
                (list (var-spec clause)))

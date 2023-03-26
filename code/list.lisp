@@ -13,15 +13,15 @@
 (defclass list-sublist-clause (list-clause on-form-slot)
   ())
 
-(defmethod make-clause ((keyword (eql :each-item)) &rest initargs)
+(defmethod make-clause (parallel (keyword (eql :each-item)) &rest initargs)
   (apply #'make-instance 'list-item-clause
          :var-spec initargs))
 
-(defmethod make-clause ((keyword (eql :each-sublist)) &rest initargs)
+(defmethod make-clause (parallel (keyword (eql :each-sublist)) &rest initargs)
   (apply #'make-instance 'list-sublist-clause
          :var-spec initargs))
 
-(defmethod wrap-form ((clause list-item-clause) form)
+(defmethod wrap-outer-form ((clause list-item-clause) form)
   `(let (,(list-var clause)
          ,@(assemble-in-order clause
                               `(:in ((,(next-list-var clause) ,(in-form clause)))
@@ -30,7 +30,7 @@
                                                       `(car ,(list-var clause)))
        ,form)))
 
-(defmethod wrap-form ((clause list-sublist-clause) form)
+(defmethod wrap-outer-form ((clause list-sublist-clause) form)
   `(let (,(list-var clause)
          ,@(assemble-in-order clause
                               `(:in ((,(next-list-var clause) ,(in-form clause)))
