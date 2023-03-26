@@ -15,7 +15,7 @@
 (defmethod wrap-form ((clause count-clause) form)
   `(let ((,(var-spec clause) 0))
      (flet ((,(var-spec clause) (&rest args)
-              (incf ,(var-spec clause) (length args))))
+              (incf ,(var-spec clause) (count-if #'identity args))))
        ,form)))
 
 (defclass narg-numeric-clause (numeric-clause from-form-slot)

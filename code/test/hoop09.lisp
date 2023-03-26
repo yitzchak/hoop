@@ -152,91 +152,95 @@
 
 ;;; NCONC, NCONCING
 
-#|(define-test hoop.9.30
-  (hoop for x in '((a b) (c d) (e f g) () (i)) nconc (copy-seq x))
-  (a b c d e f g i))
-
-(define-test hoop.9.31
-  (hoop for x in '((a b) (c d) (e f g) () (i)) nconcing (copy-seq x))
-  (a b c d e f g i))
+(define-test hoop.9.30
+  :compile-at :execute
+  (is equal
+      '(a b c d e f g i)      
+      (hoop ((:each-item x :in '((a b) (c d) (e f g) () (i)))
+             (:collect c))
+        (c (copy-seq x) :nconc))))
 
 (define-test hoop.9.32
-  (hoop for x in '((a) (b) (c . whatever)) nconc (cons (car x) (cdr x)))
-  (a b c . whatever))
-
-(define-test hoop.9.33
-  (hoop for x in '((a) (b) (c . whatever)) nconcing (cons (car x) (cdr x)))
-  (a b c . whatever))
+  :compile-at :execute
+  (is equal
+      '(a b c . whatever)
+      (hoop ((:each-item x :in '((a) (b) (c . whatever)))
+             (:collect c))
+        (c (cons (car x) (cdr x)) :nconc))))
 
 (define-test hoop.9.34
-  (hoop for x in '(a b c d)
-        nconc (list x)
-        when (eq x 'b) nconc (copy-seq '(1 2 3))
-        when (eq x 'd) nconcing (copy-seq '(4 5 6)))
-  (a b 1 2 3 c d 4 5 6))
+  :compile-at :execute
+  (is equal
+      '(a b 1 2 3 c d 4 5 6)
+      (hoop ((:each-item x :in '(a b c d))
+             (:collect c))
+        (c (list x) :nconc)
+        (when (eq x 'b)
+          (c (copy-seq '(1 2 3)) :nconc))
+        (when (eq x 'd)
+          (c (copy-seq '(4 5 6)) :nconc)))))
 
 (define-test hoop.9.35
-  (let (z)
-    (values
-     (hoop for x in '((a) (b) (c) (d))
-           nconc (copy-seq x) into foo
-           finally (setq z foo))
-     z))
-  nil
-  (a b c d))
+  :compile-at :execute
+  (is-values
+   (let (z)
+     (values (hoop ((:each-item x :in '((a) (b) (c) (d)))
+                    (:return nil)
+                    (:collect foo)
+                    (:epilogue (setq z foo)))
+               (foo (copy-seq x) :nconc))
+             z))
+   (equal nil)
+   (equal '(a b c d))))
 
 (define-test hoop.9.36
-  (hoop for x in '((a) (b) (c) (d))
-        for i from 1
-        nconc (copy-seq x) into foo
-        nconc (copy-seq x) into foo
-        nconcing (list i) into foo
-        finally (return foo))
-  (a a 1 b b 2 c c 3 d d 4))
+  :compile-at :execute
+  (is equal
+      '(a a 1 b b 2 c c 3 d d 4)
+      (hoop ((:each-item x :in '((a) (b) (c) (d)))
+             (:step i :from 1)
+             (:collect foo))
+        (foo (copy-seq x) :nconc)
+        (foo (copy-seq x) :nconc)
+        (foo (list i) :nconc))))
 
 (define-test hoop.9.37
-  (signals-error
-   (hoop with foo = '(a b)
-         for x in '(c d) nconc (list x) into foo
-         finally (return foo))
-   program-error)
-  t)
-
-(define-test hoop.9.38
-  (signals-error
-   (hoop with foo = '(a b)
-         for x in '(c d) nconcing (list x) into foo
-         finally (return foo))
-   program-error)
-  t)
+  :compile-at :execute
+  (fail-compile (hoop ((:with foo := '(a b))
+                       (:each-item x :in '(c d))
+                       (:collect foo))
+                  (foo x))
+                program-error))
 
 ;;; Combinations
 
 (define-test hoop.9.40
-  (hoop for x in '(1 2 3 4 5 6 7)
-        if (< x 2) append (list x)
-        else if (< x 5) nconc (list (1+ x))
-        else collect (+ x 2))
-  (1 3 4 5 7 8 9))
-
-(define-test hoop.9.41
-  (hoop for x in '(1 2 3 4 5 6 7)
-        if (< x 2) append (list x) into foo
-        else if (< x 5) nconc (list (1+ x)) into foo
-        else collect (+ x 2) into foo
-        finally (return foo))
-  (1 3 4 5 7 8 9))
+  :compile-at :execute
+  (is equal
+      '(1 3 4 5 7 8 9)
+      (hoop ((:each-item x :in '(1 2 3 4 5 6 7))
+             (:collect c))
+        (cond ((< x 2)
+               (c (list x) :append))
+              ((< x 5)
+               (c (list (1+ x)) :nconc))
+              (t
+               (c (+ x 2)))))))
 
 ;;; More nconc tests
 
 (define-test hoop.9.42
-  (hoop for x in '(a b c d e) nconc (cons x 'foo))
-  (a b c d e . foo))
+  :compile-at :execute
+  (is equal
+      '(a b c d e . foo)
+      (hoop ((:each-item x :in '(a b c d e))
+             (:collect c))
+        (c (cons x 'foo) :nconc))))
 
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-(define-test hoop.9.43
+#|(define-test hoop.9.43
   (macrolet
    ((%m (z) z))
    (hoop for x in '(1 2 3) collect (expand-in-current-env (%m (- x)))))

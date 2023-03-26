@@ -1,38 +1,45 @@
 (in-package #:hoop/test)
 
-#|
 (define-test hoop.13.1
-  (hoop do (return 10))
-  10)
-
-(define-test hoop.13.2
-  (hoop doing (return 10))
-  10)
+  :compile-at :execute
+  (is equal
+      10
+      (hoop ()
+        (return 10))))
 
 (define-test hoop.13.3
-  (hoop for i from 0 below 100 by 7
-        when (> i 50) return i)
-  56)
+  :compile-at :execute
+  (is equal
+      56
+      (hoop ((:step i :from 0 :before 100 :by 7))
+        (when (> i 50)
+          (return i)))))
 
 (define-test hoop.13.4
+  :compile-at :execute
+  (is equal
+      10
   (let ((x 0))
-    (hoop do
+    (hoop ()
           (incf x)
-          (when (= x 10) (return x))))
-  10)
-
-(define-test hoop.13.5
-  (hoop return 'a)
-  a)
+      (when (= x 10)
+        (return x))))))
 
 (define-test hoop.13.6
-  (hoop return (values)))
+  :compile-at :execute
+  (is-values
+      (hoop ()
+        (return (values)))))
 
 (define-test hoop.13.7
-  (hoop return (values 1 2))
-  1 2)
+  :compile-at :execute
+  (is-values
+      (hoop ()
+        (return (values 1 2)))
+      (equal 1)
+      (equal 2)))
 
-(define-test hoop.13.8
+#|(define-test hoop.13.8
   (let* ((limit (min 1000 (1- (min call-arguments-limit
                                    multiple-values-limit))))
          (vals (make-list limit :initial-element :a))
