@@ -12,12 +12,13 @@
         (return-from find-first form)))))
 
 (defun expand (type clauses body)
-  (let ((clause (apply #'make-clause type clauses))
+  (let* ((clause (apply #'make-clause type clauses))
         (before-tag (gensym))
         (after-tag (gensym))
-        (epilogue-tag (gensym)))
+        (epilogue-tag (gensym))
+        (block-name (nth-value 2 (block-name clause))))
     (analyze clause)
-    `(block ,(nth-value 2 (block-name clause))
+    `(block ,block-name
        ,(wrap-outer-form clause
                          (wrap-inner-form clause
                                           `(macrolet ((hoop-next ()
@@ -38,7 +39,7 @@
                                                 (go ,before-tag)
                                               ,epilogue-tag
                                                 ,.(epilogue-forms clause)
-                                                (return ,(nth-value 1 (return-form clause))))))))))
+                                                (return-from ,block-name ,(nth-value 1 (return-form clause))))))))))
 
 (defmacro hoop (clauses &body body)
   (expand :parallel clauses body))

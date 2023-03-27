@@ -36,7 +36,7 @@
   `(let (,(successp-var clause)
          ,(next-key-var clause)
          ,(next-value-var clause)
-         ,.(mapcar #'first (bindings-from-d-var-spec (var-spec clause))))
+         ,.(bindings-from-d-var-spec (var-spec clause)))
      (multiple-value-setq (,(successp-var clause)
                            ,(next-key-var clause)
                            ,(next-value-var clause))

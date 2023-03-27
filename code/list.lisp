@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defclass list-clause (clause var-spec-slot by-slots in-form-slot)
+(defclass list-clause (clause var-spec-slot by-slots in-form-slot update-slot)
   ((list-var :reader list-var
              :initform (gensym))
    (next-list-var :reader next-list-var
@@ -29,27 +29,46 @@
      ,form))
 
 (defmethod wrap-inner-form ((clause list-item-clause) form)
-  `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
-                                               `(car ,(list-var clause)))
-     ,form))
+  (if (update clause)
+      `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                                   `(car ,(list-var clause)))
+         ,form)
+      `(let ,(bindings-from-d-var-spec (var-spec clause))
+         ,form)))
 
 (defmethod wrap-inner-form ((clause list-sublist-clause) form)
-  `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
-                                               (list-var clause))
-     ,form))
+  (if (update clause)
+      `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                                   (list-var clause))
+         ,form)
+      `(let ,(bindings-from-d-var-spec (var-spec clause))
+         ,form)))
 
 (defmethod initial-early-forms ((clause list-clause))
   `((when (endp ,(next-list-var clause))
       (hoop-finish))))
-  
-(defmethod initial-late-forms ((clause list-clause))
-  `((setq ,(list-var clause) ,(next-list-var clause))))
+
+(defmethod initial-late-forms ((clause list-item-clause))
+  `((setq ,(list-var clause) ,(next-list-var clause)
+          ,.(unless (update clause)
+              (apply #'nconc (bindings-from-d-var-spec (var-spec clause) `(car ,(list-var clause))))))))
+
+(defmethod initial-late-forms ((clause list-sublist-clause))
+  `((setq ,(list-var clause) ,(next-list-var clause)
+          ,.(unless (update clause)
+              (apply #'nconc (bindings-from-d-var-spec (var-spec clause) (list-var clause)))))))
 
 (defmethod next-early-forms ((clause list-clause))
   `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))
     (when (endp ,(next-list-var clause))
       (hoop-finish))))
   
-(defmethod next-late-forms ((clause list-clause))
-  `((setq ,(list-var clause) ,(next-list-var clause))))
+(defmethod next-late-forms ((clause list-item-clause))
+  `((setq ,(list-var clause) ,(next-list-var clause)
+          ,.(unless (update clause)
+              (apply #'nconc (bindings-from-d-var-spec (var-spec clause) `(car ,(list-var clause))))))))
 
+(defmethod next-late-forms ((clause list-sublist-clause))
+  `((setq ,(list-var clause) ,(next-list-var clause)
+          ,.(unless (update clause)
+              (apply #'nconc (bindings-from-d-var-spec (var-spec clause) (list-var clause)))))))

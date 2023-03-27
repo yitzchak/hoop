@@ -85,6 +85,11 @@
   ((using :accessor using-form
           :initarg :using)))
 
+(defclass update-slot ()
+  ((update :accessor update
+           :initarg :update
+           :initform nil)))
+
 (defclass by-slots ()
   ((by-var :accessor by-var
            :initform (gensym))
@@ -131,8 +136,10 @@
         ((symbolp var-spec)
          `((,var-spec ,form)))
         (t
-         (nconc (bindings-from-d-var-spec (car var-spec) `(car ,form))
-                (bindings-from-d-var-spec (cdr var-spec) `(cdr ,form))))))
+         (nconc (bindings-from-d-var-spec (car var-spec) (when form
+                                                           `(car ,form)))
+                (bindings-from-d-var-spec (cdr var-spec) (when form
+                                                           `(cdr ,form)))))))
 
 (defgeneric variable-names (object)
   (:method (object)

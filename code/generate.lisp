@@ -21,7 +21,7 @@
 
 (defmethod wrap-inner-form ((clause generate-clause) form)
   (if (listp (var-spec clause))
-      `(let ,(mapcar #'first (bindings-from-d-var-spec (var-spec clause)))
+      `(let ,(bindings-from-d-var-spec (var-spec clause))
          ,form)
       `(let (,(var-spec clause))
          ,form)))

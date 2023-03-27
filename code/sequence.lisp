@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defclass sequence-clause (clause var-spec-slot in-form-slot by-slots)
+(defclass sequence-clause (clause var-spec-slot in-form-slot by-slots update-slot)
   ((seq-var :reader seq-var
             :initform (gensym))
    (end-var :reader end-var
@@ -31,19 +31,25 @@
      ,form))
 
 (defmethod wrap-inner-form ((clause sequence-clause) form)
-  `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
-                                               `(elt ,(seq-var clause) ,(index clause)))
-     ,form))
+  (if (update clause)
+      `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                                   `(elt ,(seq-var clause) ,(index clause)))
+         ,form)
+      `(let ,(bindings-from-d-var-spec (var-spec clause))
+         ,form)))
 
 (defmethod initial-early-forms ((clause sequence-clause))
-  (if (end clause)
-      `((unless (< ,(next-index clause) ,(end-var clause))
-          (hoop-finish)))
-      `((unless (< ,(next-index clause) (length ,(seq-var clause)))
-          (hoop-finish)))))
+  `((unless (< ,(next-index clause) ,(if (end clause)
+                                         (end-var clause)
+                                         `(length ,(seq-var clause))))
+      (hoop-finish))))
 
 (defmethod initial-late-forms ((clause sequence-clause))
-  `((setq ,(index clause) ,(next-index clause))))
+  `((setq ,(index clause) ,(next-index clause)
+          ,.(unless (update clause)
+              (apply #'nconc
+                     (bindings-from-d-var-spec (var-spec clause)
+                                               `(elt ,(seq-var clause) ,(index clause))))))))
 
 (defmethod next-early-forms ((clause sequence-clause))
   `((incf ,(next-index clause) ,(by-var clause))
@@ -53,5 +59,9 @@
       (hoop-finish))))
 
 (defmethod next-late-forms ((clause sequence-clause))
-  `((setq ,(index clause) ,(next-index clause))))
+  `((setq ,(index clause) ,(next-index clause)
+          ,.(unless (update clause)
+              (apply #'nconc
+                     (bindings-from-d-var-spec (var-spec clause)
+                                               `(elt ,(seq-var clause) ,(index clause))))))))
 
