@@ -40,8 +40,41 @@
           :from-end t
           :initial-value form))
 
-(defmethod termination-forms ((clause order-clause))
-  (mapcan #'termination-forms (subclauses clause)))
+(defmethod initial-early-forms ((clause parallel-clause))
+  (mapcan (lambda (subclause)
+            (nconc (initial-early-forms subclause)
+                   (initial-movable-forms subclause)))
+          (subclauses clause)))
+
+(defmethod initial-late-forms ((clause parallel-clause))
+  (mapcan #'initial-late-forms (subclauses clause)))
+
+(defmethod next-early-forms ((clause parallel-clause))
+  (mapcan (lambda (subclause)
+            (nconc (next-early-forms subclause)
+                   (next-movable-forms subclause)))
+          (subclauses clause)))
+
+(defmethod next-late-forms ((clause parallel-clause))
+  (mapcan #'next-late-forms (subclauses clause)))
+
+(defmethod initial-early-forms ((clause serial-clause))
+  (mapcan #'initial-early-forms (subclauses clause)))
+
+(defmethod initial-late-forms ((clause serial-clause))
+  (mapcan (lambda (subclause)
+            (nconc (initial-movable-forms subclause)
+                   (initial-late-forms subclause)))
+          (subclauses clause)))
+
+(defmethod next-early-forms ((clause serial-clause))
+  (mapcan #'next-early-forms (subclauses clause)))
+
+(defmethod next-late-forms ((clause serial-clause))
+  (mapcan (lambda (subclause)
+            (nconc (next-movable-forms subclause)
+                   (next-late-forms subclause)))
+          (subclauses clause)))
 
 (defmethod prologue-forms ((clause order-clause))
   (mapcan #'prologue-forms (subclauses clause)))

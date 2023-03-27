@@ -4,47 +4,72 @@
 
 (defgeneric wrap-outer-form (clause form)
   (:method (clause form)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     form))
 
 (defgeneric wrap-inner-form (clause form)
   (:method (clause form)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     form))
 
-(defgeneric termination-forms (clause)
+(defgeneric initial-early-forms (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
+    nil))
+
+(defgeneric initial-movable-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
+(defgeneric initial-late-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
+(defgeneric next-early-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
+(defgeneric next-movable-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
+(defgeneric next-late-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
     nil))
 
 (defgeneric prologue-forms (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     nil))
 
 (defgeneric before-forms (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     nil))
 
 (defgeneric after-forms (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     nil))
 
 (defgeneric epilogue-forms (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     nil))
 
 (defgeneric return-form (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     (values nil nil)))
 
 (defgeneric block-name (clause)
   (:method (clause)
-    (declare (ignore clause parallel))
+    (declare (ignore clause))
     (values nil nil)))
 
 (defclass var-spec-slot ()

@@ -4,5 +4,6 @@
   (:use #:common-lisp  #:parachute)
   (:import-from #:hoop
                 #:hoop
+                #:hoop*
                 #:hoop-finish
                 #:hoop-next))

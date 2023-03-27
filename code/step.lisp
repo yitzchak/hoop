@@ -53,23 +53,44 @@
          ,form)
       form))
 
-(defmethod termination-forms ((clause to-step-clause))
+(defmethod initial-early-forms ((clause to-step-clause))
   `((unless (or (and (plusp ,(by-var clause))
                             (<= ,(next-var clause) ,(to-var clause)))
                        (and (minusp ,(by-var clause))
                             (>= ,(next-var clause) ,(to-var clause))))
       (hoop-finish))))
 
-(defmethod termination-forms ((clause before-step-clause))
+(defmethod initial-early-forms ((clause before-step-clause))
   `((unless (or (and (plusp ,(by-var clause))
                      (< ,(next-var clause) ,(before-var clause)))
                 (and (minusp ,(by-var clause))
                      (> ,(next-var clause) ,(before-var clause))))
       (hoop-finish))))
 
-(defmethod before-forms ((clause step-clause))
+(defmethod initial-late-forms ((clause step-clause))
   (when (var-spec clause)
     `((setq ,(var-spec clause) ,(next-var clause)))))
 
-(defmethod after-forms ((clause step-clause))
+(defmethod next-early-forms ((clause step-clause))
   `((incf ,(next-var clause) ,(by-var clause))))
+
+(defmethod next-early-forms ((clause to-step-clause))
+  `((incf ,(next-var clause) ,(by-var clause))
+    (unless (or (and (plusp ,(by-var clause))
+                            (<= ,(next-var clause) ,(to-var clause)))
+                       (and (minusp ,(by-var clause))
+                            (>= ,(next-var clause) ,(to-var clause))))
+      (hoop-finish))))
+
+(defmethod next-early-forms ((clause before-step-clause))
+  `((incf ,(next-var clause) ,(by-var clause))
+    (unless (or (and (plusp ,(by-var clause))
+                     (< ,(next-var clause) ,(before-var clause)))
+                (and (minusp ,(by-var clause))
+                     (> ,(next-var clause) ,(before-var clause))))
+      (hoop-finish))))
+
+(defmethod next-late-forms ((clause step-clause))
+  (when (var-spec clause)
+    `((setq ,(var-spec clause) ,(next-var clause)))))
+

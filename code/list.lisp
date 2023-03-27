@@ -38,13 +38,18 @@
                                                (list-var clause))
      ,form))
 
-(defmethod termination-forms ((clause list-clause))
+(defmethod initial-early-forms ((clause list-clause))
   `((when (endp ,(next-list-var clause))
       (hoop-finish))))
   
-(defmethod before-forms ((clause list-clause))
+(defmethod initial-late-forms ((clause list-clause))
   `((setq ,(list-var clause) ,(next-list-var clause))))
 
-(defmethod after-forms ((clause list-clause))
-  `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))))
+(defmethod next-early-forms ((clause list-clause))
+  `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))
+    (when (endp ,(next-list-var clause))
+      (hoop-finish))))
+  
+(defmethod next-late-forms ((clause list-clause))
+  `((setq ,(list-var clause) ,(next-list-var clause))))
 

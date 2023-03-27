@@ -43,19 +43,27 @@
                           (,(iterator-var clause)))
      ,form))
 
-(defmethod termination-forms ((clause hash-table-clause))
+(defmethod initial-early-forms ((clause hash-table-clause))
   `((unless ,(successp-var clause)
       (hoop-finish))))
 
-(defmethod before-forms ((clause hash-table-clause))
+(defmethod initial-late-forms ((clause hash-table-clause))
   `((setq ,.(apply #'nconc (bindings-from-d-var-spec (first (var-spec clause))
                                                      (next-key-var clause)))
           ,.(apply #'nconc (bindings-from-d-var-spec (second (var-spec clause))
                                                      (next-value-var clause))))))
 
-(defmethod after-forms ((clause hash-table-clause))
+(defmethod next-early-forms ((clause hash-table-clause))
   `((multiple-value-setq (,(successp-var clause)
                           ,(next-key-var clause)
                           ,(next-value-var clause))
-      (,(iterator-var clause)))))
-  
+      (,(iterator-var clause)))
+    (unless ,(successp-var clause)
+      (hoop-finish))))
+
+(defmethod next-late-forms ((clause hash-table-clause))
+  `((setq ,.(apply #'nconc (bindings-from-d-var-spec (first (var-spec clause))
+                                                     (next-key-var clause)))
+          ,.(apply #'nconc (bindings-from-d-var-spec (second (var-spec clause))
+                                                     (next-value-var clause))))))
+

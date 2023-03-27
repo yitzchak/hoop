@@ -25,17 +25,23 @@
                                                       (hoop-finish ()
                                                         (list 'go ',epilogue-tag)))
                                              (tagbody
-                                              ,.(prologue-forms clause)
-                                                ,before-tag
-                                                ,.(termination-forms clause)
+                                                ,.(prologue-forms clause)
+                                                ,.(initial-early-forms clause)
+                                                ,.(initial-late-forms clause)
+                                              ,before-tag
                                                 ,.(before-forms clause)
                                                 ,@body
                                               ,after-tag  
                                                 ,.(after-forms clause)
+                                                ,.(next-early-forms clause)
+                                                ,.(next-late-forms clause)
                                                 (go ,before-tag)
                                               ,epilogue-tag
                                                 ,.(epilogue-forms clause)
                                                 (return ,(nth-value 1 (return-form clause))))))))))
 
 (defmacro hoop (clauses &body body)
+  (expand :parallel clauses body))
+
+(defmacro hoop* (clauses &body body)
   (expand :serial clauses body))

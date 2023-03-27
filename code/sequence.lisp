@@ -35,16 +35,23 @@
                                                `(elt ,(seq-var clause) ,(index clause)))
      ,form))
 
-(defmethod termination-forms ((clause sequence-clause))
+(defmethod initial-early-forms ((clause sequence-clause))
   (if (end clause)
       `((unless (< ,(next-index clause) ,(end-var clause))
           (hoop-finish)))
       `((unless (< ,(next-index clause) (length ,(seq-var clause)))
           (hoop-finish)))))
 
-(defmethod before-forms ((clause sequence-clause))
+(defmethod initial-late-forms ((clause sequence-clause))
   `((setq ,(index clause) ,(next-index clause))))
 
-(defmethod after-forms ((clause sequence-clause))
-  `((incf ,(next-index clause) ,(by-var clause))))
+(defmethod next-early-forms ((clause sequence-clause))
+  `((incf ,(next-index clause) ,(by-var clause))
+    (unless (< ,(next-index clause) ,(if (end clause)
+                                         (end-var clause)
+                                         `(length ,(seq-var clause))))
+      (hoop-finish))))
+
+(defmethod next-late-forms ((clause sequence-clause))
+  `((setq ,(index clause) ,(next-index clause))))
 
