@@ -5,18 +5,18 @@
                  :initform '(:external)
                  :initarg :symbol-types)
    (iterator-var :reader iterator-var
-                 :initform (gensym))
+                 :initform (gensym "PKG-ITER-"))
    (successp-var :reader successp-var
-                 :initform (gensym))
+                 :initform (gensym "PKG-SUCCESSP-"))
    (next-symbol-var :reader next-symbol-var
-                    :initform (gensym))
+                    :initform (gensym "PKG-NEXT-SYM-"))
    (next-status-var :reader next-status-var
-                    :initform (gensym))
+                    :initform (gensym "PKG-NEXT-STATUS-"))
    (status-var :reader status-var
                :initarg :status
                :initform nil)
    (next-package-var :reader next-package-var
-                     :initform (gensym))
+                     :initform (gensym "PKG-NEXT-PKG-"))
    (package-var :reader package-var
                 :initarg :package
                 :initform nil))

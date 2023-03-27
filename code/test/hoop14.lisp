@@ -1,28 +1,36 @@
 (in-package #:hoop/test)
 
-#|
 (define-test hoop.14.1
-(hoop* for x from 1 to 6
-when (evenp x)
-collect x)
-(2 4 6))
+  :compile-at :execute
+  (is equal
+      '(2 4 6)
+      (hoop* ((:step x :from 1 :to 6)
+              (:collect c))
+        (when (evenp x)
+          (c x)))))
 
 (define-test hoop.14.2
-(hoop* for x from 1 to 6
-unless (evenp x)
-collect x)
-(1 3 5))
+  :compile-at :execute
+  (is equal
+      '(1 3 5)
+      (hoop* ((:step x :from 1 :to 6)
+              (:collect c))
+        (unless (evenp x)
+          (c x)))))
 
 (define-test hoop.14.3
-(hoop* for x from 1 to 10
-when (evenp x)
-collect x into foo
-and count t into bar
-finally (return (values foo bar)))
-(2 4 6 8 10)
-5)
+  :compile-at :execute
+  (is-values (hoop* ((:step x :from 1 :to 10)
+                     (:collect foo)
+                     (:count bar)
+                     (:epilogue (return (values foo bar))))
+               (when (evenp x)
+                 (foo x)
+                 (bar t)))
+             (equal '(2 4 6 8 10))
+             (equal 5)))
 
-(define-test hoop.14.4
+#|(define-test hoop.14.4
 (hoop* for x from 1 to 10
 when (evenp x) collect x end)
 (2 4 6 8 10))

@@ -6,16 +6,15 @@
   (:default-initargs :into nil))
 
 (defmethod make-clause ((type (eql :collect)) &rest initargs)
-  (apply #'make-instance 'collect-clause
-         :var-spec initargs))
+  (apply #'make-instance 'collect-clause :var-spec initargs))
 
 (defmethod wrap-outer-form ((clause collect-clause) form)
-  `(let* ((,(temp-var clause) ,(into-form clause))
-          (,(tail-var clause) (last ,(temp-var clause))))
+  `(let ((,(temp-var clause) ,(into-form clause)))
      ,form))
 
 (defmethod wrap-inner-form ((clause collect-clause) form)
-  `(let ((,(var-spec clause) ,(temp-var clause)))
+  `(let ((,(tail-var clause) (last ,(temp-var clause)))
+         (,(var-spec clause) ,(temp-var clause)))
      (flet ((,(var-spec clause) (x &optional (method :collect))
               (check-type method
                           (member :collect :append :nconc))
