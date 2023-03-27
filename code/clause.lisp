@@ -1,6 +1,6 @@
 (in-package #:hoop)
 
-(defgeneric make-clause (parallel type &rest initargs))
+(defgeneric make-clause (type &rest initargs))
 
 (defgeneric wrap-outer-form (clause form)
   (:method (clause form)

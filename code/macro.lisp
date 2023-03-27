@@ -12,7 +12,7 @@
         (return-from find-first form)))))
 
 (defun expand (type clauses body)
-  (let ((clause (apply #'make-clause nil type clauses))
+  (let ((clause (apply #'make-clause type clauses))
         (before-tag (gensym))
         (after-tag (gensym))
         (epilogue-tag (gensym)))

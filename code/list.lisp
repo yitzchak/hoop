@@ -13,11 +13,11 @@
 (defclass list-sublist-clause (list-clause on-form-slot)
   ())
 
-(defmethod make-clause (parallel (keyword (eql :each-item)) &rest initargs)
+(defmethod make-clause ((keyword (eql :each-item)) &rest initargs)
   (apply #'make-instance 'list-item-clause
          :var-spec initargs))
 
-(defmethod make-clause (parallel (keyword (eql :each-sublist)) &rest initargs)
+(defmethod make-clause ((keyword (eql :each-sublist)) &rest initargs)
   (apply #'make-instance 'list-sublist-clause
          :var-spec initargs))
 

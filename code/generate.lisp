@@ -7,7 +7,7 @@
   ((then-form :accessor then-form
               :initarg :then)))
 
-(defmethod make-clause (parallel (type (eql :generate)) &rest initargs)
+(defmethod make-clause ((type (eql :generate)) &rest initargs)
   (apply #'make-instance (if (get-properties (cdr initargs) '(:then))
                              'generate-then-clause
                              'generate-clause)

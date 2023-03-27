@@ -22,7 +22,7 @@
                 :initform nil))
   (:default-initargs :in '*package*))
 
-(defmethod make-clause (parallel (type (eql :each-symbol)) &rest initargs)
+(defmethod make-clause ((type (eql :each-symbol)) &rest initargs)
   (apply #'make-instance 'package-clause :var-spec initargs))
 
 (defmethod wrap-outer-form ((clause package-clause) form)

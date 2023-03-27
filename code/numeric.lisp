@@ -9,7 +9,7 @@
 (defclass count-clause (numeric-clause)
   ())
 
-(defmethod make-clause (parallel (type (eql :count)) &rest initargs)
+(defmethod make-clause ((type (eql :count)) &rest initargs)
   (apply #'make-instance 'count-clause :var-spec initargs))
 
 (defmethod wrap-outer-form ((clause count-clause) form)
@@ -31,19 +31,19 @@
                         (apply ,(operator clause) args)))))
        ,form)))
 
-(defmethod make-clause (parallel (type (eql :sum)) &rest initargs)
+(defmethod make-clause ((type (eql :sum)) &rest initargs)
   (apply #'make-instance 'narg-numeric-clause
          :operator '(function +) :from 0 :var-spec initargs))
 
-(defmethod make-clause (parallel (type (eql :product)) &rest initargs)
+(defmethod make-clause ((type (eql :product)) &rest initargs)
   (apply #'make-instance 'narg-numeric-clause
          :operator '(function *) :from 1 :var-spec initargs))
 
-(defmethod make-clause (parallel (type (eql :maximize)) &rest initargs)
+(defmethod make-clause ((type (eql :maximize)) &rest initargs)
   (apply #'make-instance 'narg-numeric-clause
          :operator '(function max) :from nil :var-spec initargs))
 
-(defmethod make-clause (parallel (type (eql :minimize)) &rest initargs)
+(defmethod make-clause ((type (eql :minimize)) &rest initargs)
   (apply #'make-instance 'narg-numeric-clause
          :operator '(function min) :from nil :var-spec initargs))
 

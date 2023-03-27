@@ -5,7 +5,7 @@
                  :initarg :return
                  :initform nil)))
 
-(defmethod make-clause (parallel (keyword (eql :return)) &rest initargs)
+(defmethod make-clause ((keyword (eql :return)) &rest initargs)
   (apply #'make-instance 'return-clause :return initargs))
 
 (defmethod return-form ((clause return-clause))

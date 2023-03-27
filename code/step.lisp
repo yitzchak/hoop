@@ -18,7 +18,7 @@
    (before-var :reader before-var
            :initform (gensym))))
 
-(defmethod make-clause (parallel (keyword (eql :step)) &rest initargs)
+(defmethod make-clause ((keyword (eql :step)) &rest initargs)
   (apply #'make-instance (cond ((getf (cdr initargs) :to)
                                 'to-step-clause)
                                ((getf (cdr initargs) :before)

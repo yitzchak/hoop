@@ -18,7 +18,7 @@
   (:default-initargs :start 0
                      :by 1))
 
-(defmethod make-clause (parallel (type (eql :each-elt)) &rest initargs)
+(defmethod make-clause ((type (eql :each-elt)) &rest initargs)
   (apply #'make-instance 'sequence-clause :var-spec initargs))
 
 (defmethod wrap-outer-form ((clause sequence-clause) form)

@@ -10,16 +10,16 @@
 (defclass serial-clause (order-clause)
   ())
 
-(defmethod make-clause (parallel (type (eql :parallel)) &rest initargs)
+(defmethod make-clause ((type (eql :parallel)) &rest initargs)
   (make-instance 'parallel-clause
                  :subclauses (mapcar (lambda (args)
-                                       (apply #'make-clause t args))
+                                       (apply #'make-clause args))
                                      initargs)))
 
-(defmethod make-clause (parallel (type (eql :serial)) &rest initargs)
+(defmethod make-clause ((type (eql :serial)) &rest initargs)
   (make-instance 'serial-clause
                  :subclauses (mapcar (lambda (args)
-                                       (apply #'make-clause nil args))
+                                       (apply #'make-clause args))
                                      initargs)))
 
 (defmethod wrap-outer-form ((clause parallel-clause) form)
