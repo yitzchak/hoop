@@ -11,32 +11,31 @@
       (when returnp
         (return-from find-first form)))))
 
+(defun expand (type clauses body)
+  (let ((clause (apply #'make-clause nil type clauses))
+        (before-tag (gensym))
+        (after-tag (gensym))
+        (epilogue-tag (gensym)))
+    (analyze clause)
+    `(block ,(nth-value 2 (block-name clause))
+       ,(wrap-outer-form clause
+                         (wrap-inner-form clause
+                                          `(macrolet ((hoop-next ()
+                                                        (list 'go ',after-tag))
+                                                      (hoop-finish ()
+                                                        (list 'go ',epilogue-tag)))
+                                             (tagbody
+                                              ,.(prologue-forms clause)
+                                                ,before-tag
+                                                ,.(termination-forms clause)
+                                                ,.(before-forms clause)
+                                                ,@body
+                                              ,after-tag  
+                                                ,.(after-forms clause)
+                                                (go ,before-tag)
+                                              ,epilogue-tag
+                                                ,.(epilogue-forms clause)
+                                                (return ,(nth-value 1 (return-form clause))))))))))
+
 (defmacro hoop (clauses &body body)
-  (let ((clauses (mapcar (lambda (args)
-                           (apply #'make-clause nil args))
-                         clauses)))
-    (analyze clauses)
-    (let* ((before-tag (gensym))
-           (after-tag (gensym))
-           (epilogue-tag (gensym))
-           (body-form `(macrolet ((hoop-next ()
-                                    (list 'go ',after-tag))
-                                  (hoop-finish ()
-                                    (list 'go ',epilogue-tag)))
-                         (tagbody
-                            ,.(mapcan #'prologue-forms clauses)
-                          ,before-tag
-                            ,.(mapcan #'termination-forms clauses)
-                            ,.(mapcan #'before-forms clauses)
-                            ,@body
-                          ,after-tag  
-                            ,.(mapcan #'after-forms clauses)
-                            (go ,before-tag)
-                          ,epilogue-tag
-                            ,.(mapcan #'epilogue-forms clauses)
-                            (return ,(find-first #'return-form clauses))))))
-      `(block ,(find-first #'block-name clauses)
-         ,(reduce #'wrap-outer-form clauses
-                  :from-end t
-                  :initial-value (reduce #'wrap-inner-form clauses
-                                         :from-end t :initial-value body-form))))))
+  (expand :serial clauses body))

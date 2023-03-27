@@ -21,23 +21,22 @@
   (apply #'make-instance 'list-sublist-clause
          :var-spec initargs))
 
-(defmethod wrap-outer-form ((clause list-item-clause) form)
-  `(let (,(list-var clause)
+(defmethod wrap-outer-form ((clause list-clause) form)
+  `(let* (,(list-var clause)
          ,@(assemble-in-order clause
                               `(:in ((,(next-list-var clause) ,(in-form clause)))
                                 :by ((,(by-var clause) ,(by-form clause))))))
-     (symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
-                                                      `(car ,(list-var clause)))
-       ,form)))
+     ,form))
 
-(defmethod wrap-outer-form ((clause list-sublist-clause) form)
-  `(let (,(list-var clause)
-         ,@(assemble-in-order clause
-                              `(:in ((,(next-list-var clause) ,(in-form clause)))
-                                :by ((,(by-var clause) ,(by-form clause))))))
-     (symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
-                                                 (list-var clause))
-       ,form)))
+(defmethod wrap-inner-form ((clause list-item-clause) form)
+  `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                               `(car ,(list-var clause)))
+     ,form))
+
+(defmethod wrap-inner-form ((clause list-sublist-clause) form)
+  `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
+                                               (list-var clause))
+     ,form))
 
 (defmethod termination-forms ((clause list-clause))
   `((when (endp ,(next-list-var clause))

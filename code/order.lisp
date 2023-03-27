@@ -4,26 +4,41 @@
   ((subclauses :reader subclauses
                :initarg :subclauses)))
 
+(defclass parallel-clause (order-clause)
+  ())
+
+(defclass serial-clause (order-clause)
+  ())
+
 (defmethod make-clause (parallel (type (eql :parallel)) &rest initargs)
-  (make-instance 'order-clause
+  (make-instance 'parallel-clause
                  :subclauses (mapcar (lambda (args)
                                        (apply #'make-clause t args))
                                      initargs)))
 
 (defmethod make-clause (parallel (type (eql :serial)) &rest initargs)
-  (make-instance 'order-clause
+  (make-instance 'serial-clause
                  :subclauses (mapcar (lambda (args)
                                        (apply #'make-clause nil args))
                                      initargs)))
 
-(defmethod wrap-outer-form ((clause order-clause) form)
+(defmethod wrap-outer-form ((clause parallel-clause) form)
   (reduce #'wrap-outer-form (subclauses clause)
           :from-end t
-          :initial-value (reduce #'wrap-inner-form (subclauses clause)
-                                 :from-end t :initial-value form)))
+          :initial-value form))
 
-(defmethod wrap-inner-form ((clause order-clause) form)
-  form)
+(defmethod wrap-inner-form ((clause parallel-clause) form)
+  (reduce #'wrap-inner-form (subclauses clause)
+          :from-end t :initial-value form))
+
+(defmethod wrap-outer-form ((clause serial-clause) form)
+  (reduce (lambda (subclause form)
+            (wrap-outer-form subclause
+                             (wrap-inner-form subclause
+                                              form)))
+          (subclauses clause)
+          :from-end t
+          :initial-value form))
 
 (defmethod termination-forms ((clause order-clause))
   (mapcan #'termination-forms (subclauses clause)))
@@ -55,3 +70,6 @@
       (when validp
         (return-from block-name (values t name)))))
   (values nil nil))
+
+(defmethod variable-names ((clause order-clause))
+  (mapcan #'variable-names (subclauses clause)))

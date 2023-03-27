@@ -5,7 +5,7 @@
 
 (defclass generate-then-clause (generate-clause)
   ((then-form :accessor then-form
-              :initarg :then)))
+              :initarg :then)
    (use-then-var :accessor use-then-var
                  :initform (gensym))))
 
