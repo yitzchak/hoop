@@ -28,30 +28,30 @@
          :var-spec initargs))
 
 (defmethod wrap-outer-form ((clause step-clause) form)
-  `(let (,@(when (var-spec clause)
-             (list (var-spec clause)))
-         ,@(assemble-in-order clause
-                              `(:from ((,(next-var clause) ,(from-form clause)))
-                                :by ((,(by-var clause) ,(by-form clause))))))
+  `(let ,(assemble-in-order clause
+                            `(:from ((,(next-var clause) ,(from-form clause)))
+                              :by ((,(by-var clause) ,(by-form clause)))))
      ,form))
 
 (defmethod wrap-outer-form ((clause to-step-clause) form)
-  `(let (,@(when (var-spec clause)
-             (list (var-spec clause)))
-         ,@(assemble-in-order clause
-                              `(:from ((,(next-var clause) ,(from-form clause)))
-                                :by ((,(by-var clause) ,(by-form clause)))
-                                :to ((,(to-var clause) ,(to clause))))))
+  `(let ,(assemble-in-order clause
+                            `(:from ((,(next-var clause) ,(from-form clause)))
+                              :by ((,(by-var clause) ,(by-form clause)))
+                              :to ((,(to-var clause) ,(to clause)))))
      ,form))
 
 (defmethod wrap-outer-form ((clause before-step-clause) form)
-  `(let (,@(when (var-spec clause)
-             (list (var-spec clause)))
-         ,@(assemble-in-order clause
-                              `(:from ((,(next-var clause) ,(from-form clause)))
-                                :by ((,(by-var clause) ,(by-form clause)))
-                                :before ((,(before-var clause) ,(before clause))))))
+  `(let ,(assemble-in-order clause
+                            `(:from ((,(next-var clause) ,(from-form clause)))
+                              :by ((,(by-var clause) ,(by-form clause)))
+                              :before ((,(before-var clause) ,(before clause)))))
      ,form))
+
+(defmethod wrap-inner-form ((clause step-clause) form)
+  (if (var-spec clause)
+      `(let (,(var-spec clause))
+         ,form)
+      form))
 
 (defmethod termination-forms ((clause to-step-clause))
   `((unless (or (and (plusp ,(by-var clause))

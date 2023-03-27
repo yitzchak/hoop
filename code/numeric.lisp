@@ -22,7 +22,7 @@
   ((operator :reader operator
              :initarg :operator)))
 
-(defmethod wrap-outer-form ((clause narg-numeric-clause) form)
+(defmethod wrap-inner-form ((clause narg-numeric-clause) form)
   `(let ((,(var-spec clause) ,(from-form clause)))
      (flet ((,(var-spec clause) (&rest args)
               (setf ,(var-spec clause)
