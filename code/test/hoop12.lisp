@@ -96,7 +96,7 @@
   (is equal
       t
       (hoop* ((:each-item x :in '(1 2 3 4 5 6))
-              (:before (hoop-finish))
+              (:prologue (hoop-finish))
               (:always nil)))))
 
 ;;; Tests of NEVER
@@ -173,7 +173,7 @@
   (is equal
       t
       (hoop* ((:each-item x :in '(1 2 3 4 5 6))
-              (:before (hoop-finish))
+              (:prologue (hoop-finish))
               (:never t)))))
 
 ;;; Tests of THEREIS

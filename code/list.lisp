@@ -22,10 +22,10 @@
          :var-spec initargs))
 
 (defmethod wrap-outer-form ((clause list-clause) form)
-  `(let* (,(list-var clause)
-         ,@(assemble-in-order clause
-                              `(:in ((,(next-list-var clause) ,(in-form clause)))
-                                :by ((,(by-var clause) ,(by-form clause))))))
+  `(let (,(list-var clause)
+        ,@(assemble-in-order clause
+                             `(:in ((,(next-list-var clause) ,(in-form clause)))
+                               :by ((,(by-var clause) ,(by-form clause))))))
      ,form))
 
 (defmethod wrap-inner-form ((clause list-item-clause) form)

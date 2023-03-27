@@ -17,6 +17,6 @@
          ,form)))
 
 (defmethod wrap-inner-form ((clause with-clause) form)
-  `(let* ,(bindings-from-d-var-spec (var-spec clause)
-                                    (temp-var clause))
+  `(let ,(bindings-from-d-var-spec (var-spec clause)
+                                   (temp-var clause))
      ,form))

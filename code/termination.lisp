@@ -10,7 +10,11 @@
 (defmethod make-clause ((type (eql :while)) &rest initargs)
   (apply #'make-instance 'while-clause :test initargs))
 
-(defmethod before-forms ((clause while-clause))
+(defmethod initial-movable-forms ((clause while-clause))
+  `((unless ,(test-form clause)
+      (hoop-finish))))
+
+(defmethod next-movable-forms ((clause while-clause))
   `((unless ,(test-form clause)
       (hoop-finish))))
 
@@ -21,7 +25,11 @@
 (defmethod make-clause ((type (eql :until)) &rest initargs)
   (apply #'make-instance 'until-clause :test initargs))
 
-(defmethod before-forms ((clause until-clause))
+(defmethod initial-movable-forms ((clause until-clause))
+  `((when ,(test-form clause)
+      (hoop-finish))))
+
+(defmethod next-movable-forms ((clause until-clause))
   `((when ,(test-form clause)
       (hoop-finish))))
 
@@ -31,7 +39,11 @@
 (defmethod make-clause ((type (eql :always)) &rest initargs)
   (apply #'make-instance 'always-clause :test initargs))
 
-(defmethod before-forms ((clause always-clause))
+(defmethod initial-movable-forms ((clause always-clause))
+  `((unless ,(test-form clause)
+      (return nil))))
+
+(defmethod next-movable-forms ((clause always-clause))
   `((unless ,(test-form clause)
       (return nil))))
 
@@ -44,7 +56,11 @@
 (defmethod make-clause ((type (eql :never)) &rest initargs)
   (apply #'make-instance 'never-clause :test initargs))
 
-(defmethod before-forms ((clause never-clause))
+(defmethod initial-movable-forms ((clause never-clause))
+  `((when ,(test-form clause)
+      (return nil))))
+
+(defmethod next-movable-forms ((clause never-clause))
   `((when ,(test-form clause)
       (return nil))))
 
@@ -57,7 +73,12 @@
 (defmethod make-clause ((type (eql :thereis)) &rest initargs)
   (apply #'make-instance 'thereis-clause :test initargs))
 
-(defmethod before-forms ((clause thereis-clause))
+(defmethod initial-movable-forms ((clause thereis-clause))
+  `((let ((,(temp-var clause) ,(test-form clause)))
+      (when ,(temp-var clause)
+        (return ,(temp-var clause))))))
+
+(defmethod next-movable-forms ((clause thereis-clause))
   `((let ((,(temp-var clause) ,(test-form clause)))
       (when ,(temp-var clause)
         (return ,(temp-var clause))))))
@@ -78,9 +99,10 @@
   `(let ((,(remaining-var clause) ,(count-form clause)))
      ,form))
 
-(defmethod before-forms ((clause repeat-clause))
+(defmethod initial-early-forms ((clause repeat-clause))
   `((unless (plusp ,(remaining-var clause))
       (hoop-finish))))
 
-(defmethod after-forms ((clause repeat-clause))
-  `((decf ,(remaining-var clause))))
+(defmethod next-early-forms ((clause repeat-clause))
+  `((unless (plusp (decf ,(remaining-var clause)))
+     (hoop-finish))))
