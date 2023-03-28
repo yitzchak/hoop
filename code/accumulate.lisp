@@ -44,5 +44,5 @@
               x))
        ,form)))
 
-(defmethod return-form ((clause collect-clause))
-  (values t (var-spec clause)))
+(defmethod return-value-forms ((clause collect-clause))
+  (list (var-spec clause)))

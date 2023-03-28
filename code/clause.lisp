@@ -67,6 +67,11 @@
     (declare (ignore clause))
     (values nil nil)))
 
+(defgeneric return-value-forms (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
 (defgeneric block-name (clause)
   (:method (clause)
     (declare (ignore clause))

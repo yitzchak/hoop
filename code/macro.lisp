@@ -39,7 +39,12 @@
                                                 (go ,before-tag)
                                               ,epilogue-tag
                                                 ,.(epilogue-forms clause)
-                                                (return-from ,block-name ,(nth-value 1 (return-form clause))))))))))
+                                                (return-from ,block-name
+                                                  ,(multiple-value-bind (returnp form)
+                                                       (return-form clause)
+                                                     (if returnp
+                                                         form
+                                                         `(values ,.(return-value-forms clause))))))))))))
 
 (defmacro hoop (clauses &body body)
   (expand :parallel clauses body))

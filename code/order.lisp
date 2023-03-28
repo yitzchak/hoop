@@ -96,6 +96,9 @@
         (return-from return-form (values t form)))))
   (values nil nil))
 
+(defmethod return-value-forms ((clause order-clause))
+  (mapcan #'return-value-forms (subclauses clause)))
+
 (defmethod block-name ((clause order-clause))
   (dolist (subclause (subclauses clause))
     (multiple-value-bind (validp name)
@@ -106,3 +109,4 @@
 
 (defmethod variable-names ((clause order-clause))
   (mapcan #'variable-names (subclauses clause)))
+

@@ -22,8 +22,7 @@
   :compile-at :execute
   (is-values (hoop* ((:step x :from 1 :to 10)
                      (:collect foo)
-                     (:count bar)
-                     (:epilogue (return (values foo bar))))
+                     (:count bar))
                (when (evenp x)
                  (foo x)
                  (bar t)))

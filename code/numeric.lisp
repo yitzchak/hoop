@@ -3,8 +3,8 @@
 (defclass numeric-clause (var-spec-slot)
   ())
 
-(defmethod return-form ((clause numeric-clause))
-  (values t (var-spec clause)))
+(defmethod return-value-forms ((clause numeric-clause))
+  (list (var-spec clause)))
 
 (defclass count-clause (numeric-clause)
   ())
