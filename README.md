@@ -1,4 +1,61 @@
-# hoop
+# HOOP
+
+HOOP is an iteration facility for Common Lisp that is conceptually
+similar to the builtin LOOP facility. There are some significant
+differences though:
+
+1. HOOP places all of the iteration clauses in the first argument
+   position like LET.
+
+2. Accumulation clauses are delected in the "binding" group, but
+   called in the body via functioned declared with FLET. The currect
+   value of the accumulation can be accessed with a variable of the
+   same name.
+
+3. Various termination clauses can be placed in the "binding" group or
+   HOOP-FINISH, HOOP-NEXT, or RETURN can be called in the body.
+
+4. There are no unconditional, conditional or other selectable
+   clauses. These are left as ordinary Lisp forms in a body as in LET.
+
+5. There is no parsing of the body or of the binding forms. The
+   binding and iteration forms are typically passed to the appropriate
+   MAKE-INSTANCE for the clause type. What appears to be keywords are
+   usually just key/value pairs.
+
+6. There is a parallel binding version (HOOP) and a serial binding
+   version (HOOP*). One can also switch between parallel and serial
+   with the `:parallel` or `:serial` clauses.
+
+HOOP is still experimental. It does not have type declarations or much
+type checking yet. It can do everything else LOOP can do and
+somethings that LOOP cannot. Generally there is a simple translation
+between LOOP and HOOP. For example using LOOP to collect generate `'(1
+3 5 7 9)` could be done with:
+
+```lisp
+(loop for i from 1 to 10
+      when (oddp i)
+        collect i)
+```
+
+Using HOOP this can be done with:
+
+```
+(hoop* ((:step i :from 1 :to 10)
+        (:collect c))
+  (when (oddp i)
+    (c i)))
+```
+
+The overall syntax of HOOP with serial bindings is
+
+```lisp
+(hoop* (clause*)
+  body)
+```
+
+The various clauses are described below.
 
 ## Step Clause
 
