@@ -114,7 +114,7 @@
 
 (defclass temp-var-slot ()
   ((temp-var :reader temp-var
-             :initform (gensym))))
+             :initform (gensym "TEMP"))))
 
 (defclass clause ()
   ((initargs-order :accessor initargs-order)))

@@ -15,69 +15,80 @@
       (hoop* ((:each-sublist x :in '(1 2 3 4)))
         (when (evenp (car x)) (return x)))))
 
-#|(define-test hoop.3.3
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist x :in '(a b c . d) collect (car x))
-(a b c))
+(define-test hoop.3.3
+  :compile-at :execute
+  (is equal
+      '(a b c)
+      (hoop* ((:each-sublist x :in '(a b c . d))
+              (:collect c))
+        (c (car x)))))
 
 (define-test hoop.3.4
-:compile-at :execute
-(is equal
-(let ((x nil))
-(hoop* ((:each-sublist e :in '(a b c d) do (push (car e) x))
-x)
-(d c b a))
+  :compile-at :execute
+  (is equal
+      '(d c b a)
+      (let ((x nil))
+        (hoop* ((:each-sublist e :in '(a b c d)))
+          (push (car e) x))
+        x)))
 
 (define-test hoop.3.5
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist e :in '(a b c d e f) :by #'cddr
-collect (car e))
-(a c e))
+  :compile-at :execute
+  (is equal
+      '(a c e)
+      (hoop* ((:each-sublist e :in '(a b c d e f) :by #'cddr)
+              (:collect c))
+        (c (car e)))))
 
 (define-test hoop.3.6
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist e :in '(a b c d e f g) :by #'cddr
-collect (car e))
-(a c e g))
+  :compile-at :execute
+  (is equal
+      '(a c e g)
+      (hoop* ((:each-sublist e :in '(a b c d e f g) :by #'cddr)
+              (:collect c))
+        (c (car e)))))
 
 (define-test hoop.3.7
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist e :in '(a b c d e f)
-:by #'(lambda (l) (and (cdr l) (cons (car l) (cddr l))))
-collect (car e))
-(a a a a a a))
+  :compile-at :execute
+  (is equal
+      '(a a a a a a)
+      (hoop* ((:each-sublist e :in '(a b c d e f)
+               :by #'(lambda (l)
+                       (and (cdr l) (cons (car l) (cddr l)))))
+              (:collect c))
+        (c (car e)))))
 
 (define-test hoop.3.8
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist ((x . y)) :in '((a . b) (c . d) (e . f))
-collect (list x y))
-((a b) (c d) (e f)))
+  :compile-at :execute
+  (is equal
+      '((a b) (c d) (e f))
+      (hoop* ((:each-sublist ((x . y)) :in '((a . b) (c . d) (e . f)))
+              (:collect c))
+        (c (list x y)))))
 
 (define-test hoop.3.9
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist ((x nil y)) :in '((a b c) (d e f) (g h i))
-collect (list x y))
-((a c) (d f) (g i)))
+  :compile-at :execute
+  (is equal
+      '((a c) (d f) (g i))
+      (hoop* ((:each-sublist ((x nil y)) :in '((a b c) (d e f) (g h i)))
+              (:collect c))
+        (c (list x y)))))
 
-(define-test hoop.3.10
+#|(define-test hoop.3.10
 :compile-at :execute
-(is equal
-(hoop* ((:each-sublist ((x y)) of-type (fixnum) :in '((1 2) (3 4) (5 6))
-collect (+ x y))
-(3 7 11))
+  (is equal
+      '(3 7 11)
+      (hoop* ((:each-sublist ((x y)) of-type (fixnum) :in '((1 2) (3 4) (5 6)))
+              (:collect c))
+        (c (+ x y)))))
 
 (define-test hoop.3.11
 :compile-at :execute
-(is equal
+  (is equal
+      '(3 7 11)
 (hoop* ((:each-sublist ((x y)) of-type (fixnum) :in '((1 2) (3 4) (5 6))
 collect (+ x y))
-(3 7 11))
+)
 
 (define-test hoop.3.12
 :compile-at :execute
@@ -91,42 +102,47 @@ collect (+ x y))
 (is equal
 (hoop* ((:each-sublist ((x . y)) of-type ((fixnum . fixnum)) :in '((1 . 2) (3 . 4) (5 . 6))
 collect (+ x y))
-(3 7 11))
+(3 7 11))|#
 
 (define-test hoop.3.14
-:compile-at :execute
-(fail
-(hoop* ((:each-sublist x :in '(a b c)
-for x :in '(d e f) collect x)
-'program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:each-sublist x :in '(a b c))
+                        (:each-item x :in '(d e f))
+                        (:collect c))
+                  (c x))
+                program-error))
 
 (define-test hoop.3.15
-(fail (hoop* ((:each-sublist (x . x) :in '((a b) (c d)) collect x)
-'program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:each-sublist (x . x) :in '((a b) (c d)))
+                        (:collect c))
+                  (c x))
+                program-error))
 
 (define-test hoop.3.16
-(hoop* ((:each-sublist nil :in nil do (return t))
-nil)
+  :compile-at :execute
+  (false (hoop* ((:each-sublist nil :in nil))
+           (return t))))
 
 (define-test hoop.3.17
-(let ((x '(a b c)))
-(values
-x
-(hoop* ((:each-sublist x :in '(d e f) collect x)
-x))
-(a b c)
-((d e f) (e f) (f))
-(a b c))
+  :compile-at :execute
+  (is-values (let ((x '(a b c)))
+               (values x
+                       (hoop* ((:each-sublist x :in '(d e f))
+                               (:collect c))
+                         (c x))
+                       x))
+             (equal '(a b c))
+             (equal '((d e f) (e f) (f)))
+             (equal '(a b c))))
 
-(define-test hoop.3.18
+#|(define-test hoop.3.18
 (hoop* ((:each-sublist (x) of-type ((integer 0 10)) :in '(2 4 6 7) sum x)
-19)
+19)|#
 
 ;;; Tests of the 'AS' form
 
-(define-test hoop.3.19
+#|(define-test hoop.3.19
 (hoop* as x :in '(1 2 3) sum (car x))
 6)
 

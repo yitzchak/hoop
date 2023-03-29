@@ -44,8 +44,12 @@
       `(let ,(bindings-from-d-var-spec (var-spec clause))
          ,form)))
 
-(defmethod initial-early-forms ((clause list-clause))
+(defmethod initial-early-forms ((clause list-item-clause))
   `((when (endp ,(next-list-var clause))
+      (hoop-finish))))
+
+(defmethod initial-early-forms ((clause list-sublist-clause))
+  `((when (atom ,(next-list-var clause))
       (hoop-finish))))
 
 (defmethod initial-late-forms ((clause list-item-clause))
@@ -58,9 +62,14 @@
           ,.(unless (update clause)
               (apply #'nconc (bindings-from-d-var-spec (var-spec clause) (list-var clause)))))))
 
-(defmethod next-early-forms ((clause list-clause))
+(defmethod next-early-forms ((clause list-item-clause))
   `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))
     (when (endp ,(next-list-var clause))
+      (hoop-finish))))
+  
+(defmethod next-early-forms ((clause list-sublist-clause))
+  `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))
+    (when (atom ,(next-list-var clause))
       (hoop-finish))))
   
 (defmethod next-late-forms ((clause list-item-clause))
