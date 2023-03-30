@@ -56,38 +56,44 @@
          done)
         x)))
 
-#|(define-test hoop.17.7
-:compile-at :execute
-(let ((x 0))
-(catch 'done
-(hoop
-do (throw 'done nil)
-:epilogue (incf x)))
-x)
-0)
+(define-test hoop.17.7
+  :compile-at :execute
+  (is equal
+      0
+      (let ((x 0))
+        (catch 'done
+          (hoop* ((:epilogue (incf x)))
+            (throw 'done nil)))
+        x)))
 
 (define-test hoop.17.8
-(hoop
-for x in '(1 2 3)
-collect x
-:epilogue (return 'good))
-good)
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:collect c)
+              (:epilogue (return 'good)))
+        (c x))))
 
 (define-test hoop.17.9
-(hoop
-for x in '(1 2 3)
-append (list x)
-:epilogue (return 'good))
-good)
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:collect c)
+              (:epilogue (return 'good)))
+        (c (list x) :append))))
 
 (define-test hoop.17.10
-(hoop
-for x in '(1 2 3)
-nconc (list x)
-:epilogue (return 'good))
-good)
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:collect c)
+              (:epilogue (return 'good)))
+        (c (list x) :nconc))))
 
-(define-test hoop.17.11
+#|(define-test hoop.17.11
 (hoop
 for x in '(1 2 3)
 count (> x 1)
