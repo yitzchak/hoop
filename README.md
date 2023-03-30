@@ -1,14 +1,71 @@
 # HOOP
 
 HOOP is an iteration facility for Common Lisp that is conceptually
-similar to the builtin LOOP facility. There are some significant
-differences though:
+similar to the builtin LOOP facility. Unlike LOOP it separates clauses
+that create bindings or iteration from body forms which LOOP calls
+unconditional, conditional or selectable clauses.
+
+HOOP is still experimental. It does not have type declarations or much
+type checking yet. It has all of the functionality of LOOP and some
+additional functionality such as the ability to update values in lists
+or sequences. Generally there is a simple translation between LOOP and
+HOOP. For example using LOOP to collect generate
+`'((1 . a) (3 . c) (5 . e))` could be done with:
+
+```lisp
+(loop for i from 1
+      for j in '(a b c d e)
+      when (oddp i)
+        collect (cons i j))
+```
+
+Using HOOP this can be done with:
+
+```
+(hoop* ((:step i :from 1)
+        (:each-item j :in '(a b c d e))
+        (:collect c))
+  (when (oddp i)
+    (c (cons i j))))
+```
+
+## Overall HOOP Syntax
+
+```lisp
+([hoop | hoop*] ((:step var &key from to before by)
+                 (:each-item var &key in by update)
+                 (:each-sublist var &key in by update)
+                 (:each-elt var &key in by start end index update)
+                 (:each-key-value (key value) &key in)
+                 (:each-symbol var &key in symbol-types status package)
+                 (:with var &key =)
+                 (:collect var &key into)
+                 (:count var)
+                 (:minimize var)
+                 (:maximize var)
+                 (:sum var)
+                 (:product var)
+                 (:while form)
+                 (:until form)
+                 (:always form)
+                 (:never form)
+                 (:thereis form)
+                 (:repeat form)
+                 (:named symbol)
+                 (:prologue form*)
+                 (:epilogue form*)
+                 (:before form*)
+                 (:after form*))
+  tagbody-form*)
+```
+
+## Differences between LOOP and HOOP
 
 1. HOOP places all of the iteration clauses in the first argument
    position like LET.
 
-2. Accumulation clauses are delected in the "binding" group, but
-   called in the body via functioned declared with FLET. The currect
+2. Accumulation clauses are declared in the "binding" group, but
+   called in the body via functions declared with FLET. The currect
    value of the accumulation can be accessed with a variable of the
    same name.
 
@@ -27,26 +84,6 @@ differences though:
    version (HOOP*). One can also switch between parallel and serial
    with the `:parallel` or `:serial` clauses.
 
-HOOP is still experimental. It does not have type declarations or much
-type checking yet. It can do everything else LOOP can do and
-somethings that LOOP cannot. Generally there is a simple translation
-between LOOP and HOOP. For example using LOOP to collect generate `'(1
-3 5 7 9)` could be done with:
-
-```lisp
-(loop for i from 1 to 10
-      when (oddp i)
-        collect i)
-```
-
-Using HOOP this can be done with:
-
-```
-(hoop* ((:step i :from 1 :to 10)
-        (:collect c))
-  (when (oddp i)
-    (c i)))
-```
 
 The overall syntax of HOOP with serial bindings is
 
@@ -54,6 +91,8 @@ The overall syntax of HOOP with serial bindings is
 (hoop* (clause*)
   body)
 ```
+
+Using HOOP versus HOOP* will use parallel bindings.
 
 The various clauses are described below.
 
@@ -103,18 +142,19 @@ NIL
 ## List Item Clause
 
 ```lisp
-(:each-item d-var-spec &key in (by #'cdr))
+(:each-item d-var-spec &key in (by #'cdr) update)
 ```
 
-Iterates over the contents of a list specifies by either `:in` or `:on`.
+Iterates over the contents of a list..
 
 * `:in` specifies the list form to iterate over. d-var-spec is applied
   to the CAR of each list CONS.
 * `:by` specifies the function to advance the iteration.
+* `:update` causes SETF applied to d-var-spec to set lisp contents via
+  symbol macros.
 
 If d-var-spec is a CONS then destructuring happens in the same way as
-LOOP. Unlike LOOP this destructuring is done via symbol macros thereby
-making it possible to use SETF to update the list values.
+LOOP.
 
 ## Examples
 
@@ -140,7 +180,7 @@ CL-USER> (hoop ((:each-item (i . x) :in '((A . 1) (B . 2) (C . 3)))
 4
 CL-USER> (defparameter a (list 1 2 3 4 5))
 A
-CL-USER> (hoop ((:each-item i :in a))
+CL-USER> (hoop ((:each-item i :in a :update t))
            (setf i (list i (if (oddp i) :odd :even))))
 NIL
 CL-USER> a
@@ -153,15 +193,16 @@ CL-USER> a
 (:each-sublist d-var-spec &key in (by #'cdr))
 ```
 
-Iterates over the contents of a list specifies by either `:in` or `:on`.
+Iterates over the sublists of a list specified by `:in`.
 
 * `:in` specifies the list form to iterate over. d-var-spec is applied
   to each list CONS.
 * `:by` specifies the function to advance the iteration.
+* `:update` causes SETF applied to d-var-spec to set lisp contents via
+  symbol macros.
 
 If d-var-spec is a CONS then destructuring happens in the same way as
-LOOP. Unlike LOOP this destructuring is done via symbol macros thereby
-making it possible to use SETF to update the list values.
+LOOP.
 
 ## Examples
 
@@ -286,9 +327,9 @@ T
 CL-USER> (intern "QUUX" 'FU)
 FU::QUUX
 NIL
-CL-USER> (hoop ((:each-symbol s :in 'fu
-                 :package p :status stat
-                 :symbol-types (:external :internal)))
+CL-USER> (hoop* ((:each-symbol s :in 'fu
+                  :package p :status stat
+                  :symbol-types (:external :internal)))
            (format t "~s ~s ~s~%" s p stat))
 FU::QUUX #<PACKAGE "FU"> :INTERNAL
 FU:BAR #<PACKAGE "FU"> :EXTERNAL
@@ -299,4 +340,144 @@ NIL
 
 ```lisp
 (:with simple-var &key =)
+```
+
+```
+;; These bindings occur in sequence.
+CL-USER> (hoop* ((:with a := 1)
+                 (:with b := (+ a 2))
+                 (:with c := (+ b 3)))
+           (return (list a b c)))
+(1 3 6)
+CL-USER> (defparameter a 5)
+A
+CL-USER> (defparameter b 10)
+B
+;; These bindings occur in parallel.
+CL-USER> (hoop* ((:parallel (:with a := 1)
+                            (:with b := (+ a 2))
+                            (:with c := (+ b 3))))
+           (return (list a b c)))
+(1 7 13)
+```
+
+## Collect Clause
+
+```lisp
+(:collect simple-var &key into)
+```
+
+```
+;; Collect all the symbols in a list.
+CL-USER> (hoop* ((:each-item i :in '(bird 3 4 turtle (1 . 4) horse cat))
+                 (:collect c))
+           (when (symbolp i)
+             (c i)))
+(BIRD TURTLE HORSE CAT)
+;; Collect and return odd numbers.
+CL-USER> (hoop* ((:step i :from 1 :to 10)
+                 (:collect c))
+           (when (oddp i)
+             (c i)))
+(1 3 5 7 9)
+;; Collect items into local variable
+CL-USER> (hoop* ((:each-item i :in '(a b c d) :by #'cddr)
+                 (:collect my-list))
+           (my-list i))
+(A C)
+;; Use APPEND to concatenate some sublists.
+CL-USER> (hoop* ((:each-item x :in '((a) (b) ((c))))
+                 (:collect c))
+           (c x :append))
+(A B (C))
+;; NCONC some sublists together.  Note that only lists made by the
+;; call to LIST are modified.
+CL-USER> (hoop* ((:step i)
+                 (:each-item x :in '(a b (c)))
+                 (:collect c))
+           (c (if (evenp i)
+                  (list x)
+                  nil)
+              :nconc))
+(A (C))
+```
+
+## Count Clause
+
+```lisp
+(:count simple-var)
+```
+
+```
+CL-USER> (hoop* ((:each-item i :in '(a b nil c nil d e))
+                 (:count c))
+           (c i))
+5
+```
+
+## Minimize Clause
+
+```lisp
+(:minimize simple-var)
+```
+
+```
+CL-USER> (defparameter series '(1.2 4.3 5.7))
+SERIES
+CL-USER> (hoop* ((:each-item v :in series)
+                 (:minimize c))
+           (c (round v)))
+1
+```
+
+## Maximize Clause
+
+```lisp
+(:maximize simple-var)
+```
+
+```
+CL-USER> (defparameter series '(1.2 4.3 5.7))
+SERIES
+CL-USER> (hoop* ((:each-item v :in series)
+                 (:maximize c))
+           (c (round v)))
+6
+```
+
+## Sum Clause
+
+```lisp
+(:sum simple-var)
+```
+
+```
+CL-USER> (hoop* ((:each-item i :in '(1 2 3 4 5))
+                 (:sum c))
+           (c i))
+15
+CL-USER> (defparameter series '(1.2 4.3 5.7))
+SERIES
+CL-USER> (hoop* ((:each-item v :in series)
+                 (:sum c))
+           (c (* 2.0 v)))
+22.4
+```
+
+## Repeat Clause
+
+```lisp
+(:repeat count-form)
+```
+
+```
+CL-USER> (hoop* ((:repeat 3))
+           (format t "~&What I say three times is true.~%"))
+What I say three times is true.
+What I say three times is true.
+What I say three times is true.
+NIL
+CL-USER> (hoop* ((:repeat -15))
+           (format t "What you see is what you expect~%"))
+NIL
 ```
