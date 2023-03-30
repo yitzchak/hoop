@@ -88,7 +88,7 @@
   (apply #'make-instance 'thereis-clause :test initargs))
 
 (defmethod wrap-outer-form ((clause thereis-clause) form)
-  `(let ((value-var clause))
+  `(let (,(value-var clause))
      ,form))
 
 (defmethod initial-movable-forms ((clause thereis-clause))
