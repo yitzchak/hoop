@@ -10,3 +10,4 @@
 
 (defmethod return-form ((clause return-clause))
   (values t (%return-form clause)))
+

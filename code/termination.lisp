@@ -4,11 +4,13 @@
   ((test-form :reader test-form
               :initarg :test)))
 
-(defclass termination-with-return-clause (termination-clause temp-var-slot)
-  ())
+(defclass termination-with-return-clause (termination-clause)
+  ((value-var :reader value-var
+              :initarg :value
+              :initform (gensym "VALUE"))))
 
 (defmethod return-value-forms ((clause termination-with-return-clause))
-  (list (temp-var clause)))
+  (list (value-var clause)))
 
 (defclass while-clause (termination-clause)
   ())
@@ -46,17 +48,17 @@
   (apply #'make-instance 'always-clause :test initargs))
 
 (defmethod wrap-outer-form ((clause always-clause) form)
-  `(let ((,(temp-var clause) t))
+  `(let ((,(value-var clause) t))
      ,form))
 
 (defmethod initial-movable-forms ((clause always-clause))
   `((unless ,(test-form clause)
-      (setq ,(temp-var clause) nil)
+      (setq ,(value-var clause) nil)
       (hoop-finish))))
 
 (defmethod next-movable-forms ((clause always-clause))
   `((unless ,(test-form clause)
-      (setq ,(temp-var clause) nil)
+      (setq ,(value-var clause) nil)
       (hoop-finish))))
 
 (defclass never-clause (termination-with-return-clause)
@@ -66,17 +68,17 @@
   (apply #'make-instance 'never-clause :test initargs))
 
 (defmethod wrap-outer-form ((clause never-clause) form)
-  `(let ((,(temp-var clause) t))
+  `(let ((,(value-var clause) t))
      ,form))
 
 (defmethod initial-movable-forms ((clause never-clause))
   `((when ,(test-form clause)
-      (setq ,(temp-var clause) nil)
+      (setq ,(value-var clause) nil)
       (hoop-finish))))
 
 (defmethod next-movable-forms ((clause never-clause))
   `((when ,(test-form clause)
-      (setq ,(temp-var clause) nil)
+      (setq ,(value-var clause) nil)
       (hoop-finish))))
 
 (defclass thereis-clause (termination-with-return-clause)
@@ -86,17 +88,17 @@
   (apply #'make-instance 'thereis-clause :test initargs))
 
 (defmethod wrap-outer-form ((clause thereis-clause) form)
-  `(let ((temp-var clause))
+  `(let ((value-var clause))
      ,form))
 
 (defmethod initial-movable-forms ((clause thereis-clause))
-  `((setq ,(temp-var clause) ,(test-form clause))
-    (when ,(temp-var clause)
+  `((setq ,(value-var clause) ,(test-form clause))
+    (when ,(value-var clause)
       (hoop-finish))))
 
 (defmethod next-movable-forms ((clause thereis-clause))
-  `((setq ,(temp-var clause) ,(test-form clause))
-    (when ,(temp-var clause)
+  `((setq ,(value-var clause) ,(test-form clause))
+    (when ,(value-var clause)
       (hoop-finish))))
 
 (defclass repeat-clause ()
