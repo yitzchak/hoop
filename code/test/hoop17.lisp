@@ -93,54 +93,66 @@
               (:epilogue (return 'good)))
         (c (list x) :nconc))))
 
-#|(define-test hoop.17.11
-(hoop
-for x in '(1 2 3)
-count (> x 1)
-:epilogue (return 'good))
-good)
+(define-test hoop.17.11
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:count c)
+              (:epilogue (return 'good)))
+        (c (> x 1)))))
 
 (define-test hoop.17.12
-(hoop
-for x in '(1 2 3)
-sum x
-:epilogue (return 'good))
-good)
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:sum c)
+              (:epilogue (return 'good)))
+        (c x))))
 
 (define-test hoop.17.13
-(hoop
-for x in '(1 2 3)
-maximize x
-:epilogue (return 'good))
-good)
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:maximize c)
+              (:epilogue (return 'good)))
+        (c x))))
 
 (define-test hoop.17.14
-(hoop
-for x in '(1 2 3)
-minimize x
-:epilogue (return 'good))
-good)
+  :compile-at :execute
+  (is equal
+      'good
+      (hoop* ((:each-item x :in '(1 2 3))
+              (:minimize c)
+              (:epilogue (return 'good)))
+        (c x))))
 
 ;;; iteration clause grouping
 
 (define-test hoop.17.20
-(hoop
-for i from 1 to 5
-for j := 0 then (+ j i)
-collect j)
-(0 2 5 9 14))
+  :compile-at :execute
+  (is equal
+      '(0 2 5 9 14)
+      (hoop* ((:step i :from 1 :to 5)
+              (:generate j :using 0 :then (+ j i))
+              (:collect c))
+        (c j))))
 
 (define-test hoop.17.21
-(hoop
-for i from 1 to 5
-and j := 0 then (+ j i)
-collect j)
-(0 1 3 6 10))
+  :compile-at :execute
+  (is equal
+      '(0 1 3 6 10)
+      (hoop ((:step i :from 1 :to 5)
+             (:generate j :using 0 :then (+ j i))
+             (:collect c))
+        (c j))))
 
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-(define-test hoop.17.22
+#|(define-test hoop.17.22
 (macrolet
 ((%m (z) z))
 (hoop* :with x := 0
