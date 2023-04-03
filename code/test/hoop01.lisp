@@ -292,7 +292,6 @@
              (equal 3)))
 
 (define-test hoop.1.33
-  :compile-at :execute
   (is equal
       '(1 2 3 4 5)
       (hoop* ((:step x :from 1 :to 5)
@@ -332,11 +331,11 @@
         (c x))))
 
 (define-test hoop.1.38
-  :compile-at :execute
   (is equal
       '(1 2 3 4 5)
-      (hoop* ((:step x #|of-type fixnum|# :from 1 :to 5)
+      (hoop* ((:step x :from 1 :to 5)
               (:collect c))
+        (declare (type fixnum x))
         (c x))))
 
 ;;; The following provides an example where an incorrect
@@ -346,8 +345,9 @@
   :compile-at :execute
   (is equal
       '(1 2 3 4 5)
-      (hoop* ((:step x #|of-type (integer 1 5)|# :from 1 :to 5)
+      (hoop* ((:step x :from 1 :to 5)
               (:collect c))
+        (declare (type (integer 1 5) x))
         (c x))))
 
 ;;; Test that the index variable achieves the inclusive
@@ -424,7 +424,6 @@
         (d c))))
 
 (define-test hoop.1.48
-  :compile-at :execute
   (is equal
       '(#c(0 1) #c(1 1) #c(2 1) #c(3 1) #c(4 1))
       (hoop* ((:step i :from 1 :to 5)
@@ -433,7 +432,6 @@
         (d c))))
 
 (define-test hoop.1.49
-  :compile-at :execute
   (is equal
       '(#c(0 1) #c(2 1) #c(4 1) #c(6 1) #c(8 1))
       (hoop* ((:step i :from 1 :to 5)

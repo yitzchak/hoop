@@ -49,7 +49,8 @@
 
 (defmethod wrap-inner-form ((clause step-clause) form)
   (if (var-spec clause)
-      `(let (,(var-spec clause))
+      `(let ((,(var-spec clause) ,(next-var clause)))
+         ,.(declarations (var-spec clause))
          ,form)
       form))
 
@@ -66,10 +67,6 @@
                 (and (minusp ,(by-var clause))
                      (> ,(next-var clause) ,(before-var clause))))
       (hoop-finish))))
-
-(defmethod initial-late-forms ((clause step-clause))
-  (when (var-spec clause)
-    `((setq ,(var-spec clause) ,(next-var clause)))))
 
 (defmethod next-early-forms ((clause step-clause))
   `((incf ,(next-var clause) ,(by-var clause))))

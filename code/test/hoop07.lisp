@@ -79,7 +79,6 @@
 ;;; form.
 
 (define-test hoop.7.15
-  :compile-at :execute
   (is equal
       '("A" "B" "BAR" "BAZ" "C" "FOO")
       (let ((*package* (find-package "HOOP.CL-TEST.1")))
@@ -90,7 +89,6 @@
               #'string<))))
 
 (define-test hoop.7.16
-  :compile-at :execute
   (is equal
       '("A" "B" "C")
       (let ((*package* (find-package "HOOP.CL-TEST.1")))

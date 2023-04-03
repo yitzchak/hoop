@@ -75,32 +75,18 @@
   :compile-at :execute
   (is equal
       '(3 7 11)
-      (hoop* ((:each-item (x y) #|of-type fixnum|# :in '((1 2) (3 4) (5 6)))
+      (hoop* ((:each-item (x y) :in '((1 2) (3 4) (5 6)))
               (:collect c))
-        (c (+ x y)))))
-
-(define-test hoop.2.11
-  :compile-at :execute
-  (is equal
-      '(3 7 11)
-      (hoop* ((:each-item (x y) #|of-type fixnum|# :in '((1 2) (3 4) (5 6)))
-              (:collect c))
-        (c (+ x y)))))
-
-(define-test hoop.2.12
-  :compile-at :execute
-  (is equal
-      '(3 7 11)
-      (hoop* ((:each-item (x y) #|of-type (fixnum fixnum)|# :in '((1 2) (3 4) (5 6)))
-              (:collect c))
+        (declare (type fixnum x y))
         (c (+ x y)))))
 
 (define-test hoop.2.13
   :compile-at :execute
   (is equal
       '(3 7 11)
-      (hoop* ((:each-item (x . y) #|of-type (fixnum . fixnum)|# :in '((1 . 2) (3 . 4) (5 . 6)))
+      (hoop* ((:each-item (x . y) :in '((1 . 2) (3 . 4) (5 . 6)))
               (:collect c))
+        (declare (type fixnum x y))
         (c (+ x y)))))
 
 (define-test hoop.2.14
@@ -141,8 +127,9 @@
   :compile-at :execute
   (is equal
       19
-      (hoop* ((:each-item x #|of-type (integer 0 10)|# :in '(2 4 6 7))
+      (hoop* ((:each-item x :in '(2 4 6 7))
               (:sum c))
+        (declare (type (integer 0 10) x))
         (c x))))
 
 ;;; Tests of the 'AS' ((:each-itemm

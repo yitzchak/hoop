@@ -138,8 +138,10 @@
   (check-type var-spec (or symbol cons))
   (cond ((null var-spec)
          nil)
-        ((symbolp var-spec)
+        ((and (symbolp var-spec) form)
          `((,var-spec ,form)))
+        ((symbolp var-spec)
+         `(,var-spec))
         (t
          (nconc (bindings-from-d-var-spec (car var-spec) (when form
                                                            `(car ,form)))
