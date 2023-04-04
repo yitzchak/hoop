@@ -11,9 +11,9 @@
       (when returnp
         (return-from find-first form)))))
 
-(defun expand (type clauses body)
+(defun expand (type clauses body env)
   (multiple-value-bind (*declaration-specifiers* forms)
-      (parse-body body)
+      (parse-body body env)
     (let* ((clause (apply #'make-clause type clauses))
            (before-tag (gensym))
            (after-tag (gensym))
@@ -49,8 +49,8 @@
                                                            form
                                                            `(values ,.(return-value-forms clause)))))))))))))
 
-(defmacro hoop (clauses &body body)
-  (expand :parallel clauses body))
+(defmacro hoop (clauses &body body &environment env)
+  (expand :parallel clauses body env))
 
-(defmacro hoop* (clauses &body body)
-  (expand :serial clauses body))
+(defmacro hoop* (clauses &body body &environment env)
+  (expand :serial clauses body env))

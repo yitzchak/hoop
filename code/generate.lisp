@@ -13,6 +13,9 @@
                              'generate-clause)
          :var-spec initargs))
 
+(defmethod declaration-targets ((clause generate-clause))
+  (bindings-from-d-var-spec (var-spec clause)))
+
 (defmethod wrap-outer-form ((clause generate-clause) form)
   (if (listp (var-spec clause))
       `(let (,(temp-var clause))

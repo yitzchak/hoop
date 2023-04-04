@@ -21,6 +21,10 @@
   (apply #'make-instance 'list-sublist-clause
          :var-spec initargs))
 
+(defmethod declaration-targets ((clause list-clause))
+  (unless (update clause)
+    (bindings-from-d-var-spec (var-spec clause))))
+
 (defmethod wrap-outer-form ((clause list-clause) form)
   `(let (,.(when (update clause)
              (list (list-var clause)))
