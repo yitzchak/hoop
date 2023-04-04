@@ -36,19 +36,31 @@
 
 ;;; type specs
 
-#|(define-test hoop.8.5
-(hoop* with a t = 1 return a)
-1)
+(define-test hoop.8.5
+  :compile-at :execute
+  (is equal
+      1
+      (hoop* ((:with a := 1))
+        (declare (type t a))
+        (return a))))
 
 (define-test hoop.8.6
-(hoop* with a fixnum = 2 return a)
-2)
+  :compile-at :execute
+  (is equal
+      2
+      (hoop* ((:with a := 2))
+        (declare (type fixnum a))
+        (return a))))
 
 (define-test hoop.8.7
-(hoop* with a float = 3.0 return a)
-3.0)
+  :compile-at :execute
+  (is equal
+      3.0
+      (hoop* ((:with a := 3.0))
+        (declare (type float a))
+        (return a))))
 
-(define-test hoop.8.8
+#|(define-test hoop.8.8
 (hoop* with a of-type string = "abc" return a)
 "abc")
 

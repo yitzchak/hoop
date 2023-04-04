@@ -161,6 +161,8 @@
       6
       (hoop* ((:each-key-value (nil v) :in *hoop.6.hash.1*)
               (:sum c))
+        (declare (type fixnum c)
+                 (type (or null fixnum) v))
         (c v))))
 
 (define-test hoop.6.25

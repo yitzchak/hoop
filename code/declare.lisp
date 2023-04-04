@@ -3,18 +3,14 @@
 (defparameter *declaration-specifiers* nil)
 
 (defun parse-body (body)
-  (prog (primary-specifiers secondary-specifiers)
+  (prog (specifiers)
    next
      (when (and (not (endp body))
                 (eq (caar body) 'declare))
-       (dolist (specifier (cdar body))
-         (if (member (car specifier)
-                     '(dynamic-extent inline notinline type ftype ignore ignorable special))
-             (push specifier primary-specifiers)
-             (push specifier secondary-specifiers)))
-       (setf body (cdr body))
+       (setf specifiers (append specifiers (cdar body))
+             body (cdr body))
        (go next))
-     (return (values primary-specifiers secondary-specifiers body))))
+     (return (values specifiers body))))
 
 (defun copy-specifier (head tail targets &optional functionp)
   (let ((new-tail (remove-if (lambda (target)
@@ -45,6 +41,53 @@
                             *declaration-specifiers*)))
     (when specifiers
       `((declare ,.specifiers)))))
+
+(defun copy-remaining-specifier (head tail targets &optional functionp)
+  (let ((new-tail (remove-if (lambda (target)
+                               (member (if functionp
+                                           `(function ,target)
+                                           target)
+                                       targets :test #'equal))
+                             tail)))
+    (when new-tail
+      (list (nconc head new-tail)))))
+
+(defun remaining-declarations (targets)
+  (let ((specifiers (mapcan (lambda (specifier)
+                              (case (car specifier)
+                                ((dynamic-extent inline notinline ignorable ignore special)
+                                 (copy-remaining-specifier (list (car specifier))
+                                                           (cdr specifier)
+                                                           targets))
+                                (type
+                                 (copy-remaining-specifier (list (car specifier) (cadr specifier))
+                                                           (cddr specifier)
+                                                           targets))
+                                (ftype
+                                 (copy-remaining-specifier (list (car specifier) (cadr specifier))
+                                                           (cddr specifier)
+                                                           targets
+                                                           t))
+                                (otherwise
+                                 (list specifier))))
+                            *declaration-specifiers*)))
+    (when specifiers
+      `((declare ,.specifiers)))))
+
+
+(defun get-type (target &optional (default t))
+  (let ((specifier (find-if (lambda (specifier)
+                              (or (and (symbolp target)
+                                       (eq (car specifier) 'type)
+                                       (member target (cddr specifier)))
+                                  (and (consp target)
+                                       (eq (car target) 'function)
+                                       (eq (car specifier) 'ftype)
+                                       (member (cadr target) (cddr specifier)))))
+                            *declaration-specifiers*)))
+    (if specifier
+        (cadr specifier)
+        default)))
 
 (defun type-declarations (target &rest targets)
   (let ((specifier (find-if (lambda (specifier)

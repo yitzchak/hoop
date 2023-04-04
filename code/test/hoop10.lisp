@@ -16,6 +16,42 @@
               (:count c))
         (c (< x 7)))))
 
+(define-test hoop.10.3
+  :compile-at :execute
+  (is equal
+      4
+      (hoop* ((:step x :from 1 :to 10)
+              (:count c))
+        (declare (type fixnum c))
+        (c (< x 5)))))
+
+(define-test hoop.10.4
+  :compile-at :execute
+  (is equal
+      4
+      (hoop* ((:step x :from 1 :to 10)
+              (:count c))
+        (declare (type integer c))
+        (c (< x 5)))))
+
+(define-test hoop.10.7
+  :compile-at :execute
+  (is equal
+      4
+      (hoop* ((:step x :from 1 :to 10)
+              (:count c))
+        (declare (type (integer 0 100) c))
+        (c (< x 5)))))
+
+(define-test hoop.10.8
+  :compile-at :execute
+  (is equal
+      4.0
+      (hoop* ((:step x :from 1 :to 10)
+              (:count c))
+        (declare (type float c))
+        (c (< x 5)))))
+
 (define-test hoop.10.9
   :compile-at :execute
   (fail-compile (hoop* ((:with foo := 10)
@@ -88,91 +124,95 @@
               (:maximize c))
         (c x))))
 
-#|(define-test hoop.10.25
-(hoop* for x in '(8 20 5 3 24 1 19 4 20 3) maximize x fixnum)
-24)
+(define-test hoop.10.25
+  :compile-at :execute
+  (is equal
+      24
+      (hoop* ((:each-item x :in '(8 20 5 3 24 1 19 4 20 3))
+              (:maximize c))
+        (declare (type fixnum x)
+                 (type (or null fixnum) c))
+        (c x))))
 
 (define-test hoop.10.26
-(hoop* for x in '(8 20 5 3 24 1 19 4 20 3) maximize x of-type integer)
-24)
+  :compile-at :execute
+  (is equal
+      24
+      (hoop* ((:each-item x :in '(8 20 5 3 24 1 19 4 20 3))
+              (:maximize c))
+        (declare (type integer x)
+                 (type (or null integer) c))
+        (c x))))
 
 (define-test hoop.10.27
-(hoop* for x in '(8 20 5 3 24 1 19 4 20 3) maximize x of-type rational)
-24)
-
-(define-test hoop.10.28
-(hoop* for x in '(1 4 10 5 7 9) maximize x into foo finally (return foo))
-10)
-
-(define-test hoop.10.29
-(let (z)
-(values
-(hoop* for x in '(1 4 10 5 7 9) maximize x into foo finally (setq z foo))
-z))
-nil
-10)
+  :compile-at :execute
+  (is equal
+      24
+      (hoop* ((:each-item x :in '(8 20 5 3 24 1 19 4 20 3))
+              (:maximize c))
+        (declare (type rational x)
+                 (type (or null rational) c))
+        (c x))))
 
 (define-test hoop.10.30
-(hoop* for x in '(8 20 5 3 24 1 19 4 20 3) maximize x of-type real)
-24)
+  :compile-at :execute
+  (is equal
+      24
+      (hoop* ((:each-item x :in '(8 20 5 3 24 1 19 4 20 3))
+              (:maximize c))
+        (declare (type real x)
+                 (type (or null real) c))
+        (c x))))
 
 (define-test hoop.10.31
-(hoop* for x in '(0.08 0.20 0.05 0.03 0.24 0.01 0.19 0.04 0.20 0.03) maximize x of-type float)
-0.24)
+  :compile-at :execute
+  (is equal
+      0.24
+      (hoop* ((:each-item x :in '(0.08 0.20 0.05 0.03 0.24 0.01 0.19 0.04 0.20 0.03))
+              (:maximize c))
+        (declare (type float x)
+                 (type (or null float) c))
+        (c x))))
 
 (define-test hoop.10.32
-(hoop* for x in '(-1/8 -1/20 -1/5 -1/3 -1/24 -1/1 -1/19 -1/4 -1/20 -1/3) maximize x of-type rational)
--1/24)
-
-(define-test hoop.10.33
-(hoop* for x in '(1 4 10 5 7 9) maximize x into foo fixnum finally (return foo))
-10)
-
-(define-test hoop.10.34
-(hoop* for x in '(1 4 10 5 7 9) maximize x into foo of-type integer finally (return foo))
-10)
-
-(define-test hoop.10.35
-(let ((foo 20))
-(values
-(hoop* for x in '(3 5 8 3 7) maximize x into foo finally (return foo))
-foo))
-8 20)
+  (is equal
+      -1/24
+      (hoop* ((:each-item x :in '(-1/8 -1/20 -1/5 -1/3 -1/24 -1/1 -1/19 -1/4 -1/20 -1/3))
+              (:maximize c))
+        (declare (type rational x)
+                 (type (or null rational) c))
+        (c x))))
 
 (declaim (special *hoop-max-var*))
 
 (define-test hoop.10.36
-(let ((*hoop-max-var* 100))
-(values
-(hoop* for x in '(1 10 4 8) maximize x into *hoop-max-var*
-finally (return *hoop-max-var*))
-*hoop-max-var*))
-10 100)
+  :compile-at :execute
+  (is-values (let ((*hoop-max-var* 100))
+               (values (hoop* ((:each-item x :in '(1 10 4 8))
+                               (:maximize *hoop-max-var*))
+                         (*hoop-max-var* x))
+                       *hoop-max-var*))
+             (equal 10)
+             (equal 100)))
 
 (define-test hoop.10.37
-(signals-error
-(hoop* with foo = 100
-for i from 1 to 10 maximize i into foo
-finally (return foo))
-program-error)
-t)
-
-(define-test hoop.10.38
-(signals-error
-(hoop* with foo = 100
-for i from 1 to 10 maximizing i into foo
-finally (return foo))
-program-error)
-t)
-
+  :compile-at :execute
+  (fail-compile (hoop* ((:with foo := 100)
+                        (:step i :from 1 :to 10)
+                        (:maximize foo))
+                  (foo x))
+                program-error))
 
 (define-test hoop.10.39
-(hoop* for x in '(1 2 3) maximize (return 10))
-10)
+    (is equal
+        10
+        (hoop* ((:each-item x :in '(1 2 3))
+                (:maximize foo))
+          (foo (return 10)))))
 
 ;;; Tests of MINIMIZE, MINIMIZING
 
-(define-test hoop.10.40
+#|(define-test hoop.10.40
 (hoop* for x in '(4 10 1 5 7 9) minimize x)
 1)
 

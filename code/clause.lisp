@@ -2,6 +2,11 @@
 
 (defgeneric make-clause (type &rest initargs))
 
+(defgeneric declaration-targets (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
 (defgeneric wrap-outer-form (clause form)
   (:method (clause form)
     (declare (ignore clause))

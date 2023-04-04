@@ -22,8 +22,11 @@
 (defmethod wrap-inner-form ((clause generate-clause) form)
   (if (listp (var-spec clause))
       `(let ,(bindings-from-d-var-spec (var-spec clause))
+         ,.(apply #'declarations
+                  (bindings-from-d-var-spec (var-spec clause)))
          ,form)
       `(let (,(var-spec clause))
+         ,.(declarations (var-spec clause))
          ,form)))
 
 (defmethod initial-movable-forms ((clause generate-clause))

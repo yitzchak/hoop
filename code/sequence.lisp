@@ -36,6 +36,8 @@
                                                    `(elt ,(seq-var clause) ,(index clause)))
          ,form)
       `(let ,(bindings-from-d-var-spec (var-spec clause))
+         ,.(apply #'declarations
+                  (bindings-from-d-var-spec (var-spec clause)))
          ,form)))
 
 (defmethod initial-early-forms ((clause sequence-clause))

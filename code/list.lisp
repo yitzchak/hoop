@@ -47,6 +47,8 @@
          ,form)
       `(let ,(bindings-from-d-var-spec (var-spec clause)
                                        (next-list-var clause))
+         ,.(apply #'declarations
+                  (bindings-from-d-var-spec (var-spec clause)))
          ,form)))
 
 (defmethod initial-early-forms ((clause list-clause))

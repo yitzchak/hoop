@@ -12,7 +12,7 @@
         (return-from find-first form)))))
 
 (defun expand (type clauses body)
-  (multiple-value-bind (*declaration-specifiers* other-specifiers forms)
+  (multiple-value-bind (*declaration-specifiers* forms)
       (parse-body body)
     (let* ((clause (apply #'make-clause type clauses))
            (before-tag (gensym))
@@ -27,8 +27,7 @@
                                                           (list 'go ',after-tag))
                                                         (hoop-finish ()
                                                           (list 'go ',epilogue-tag)))
-                                               ,.(when other-specifiers
-                                                   `((declare ,.other-specifiers)))
+                                               ,.(remaining-declarations (declaration-targets clause))
                                                (tagbody
                                                   ,.(prologue-forms clause)
                                                   ,.(initial-early-forms clause)

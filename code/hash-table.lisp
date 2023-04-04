@@ -37,6 +37,8 @@
          ,(next-key-var clause)
          ,(next-value-var clause)
          ,.(bindings-from-d-var-spec (var-spec clause)))
+     ,.(apply #'declarations
+              (bindings-from-d-var-spec (var-spec clause)))
      (multiple-value-setq (,(successp-var clause)
                            ,(next-key-var clause)
                            ,(next-value-var clause))
