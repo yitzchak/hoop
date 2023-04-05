@@ -118,28 +118,42 @@
           (declare (type bit e))
           (foo e)))))
 
-#|(define-test hoop.5.20
-(let ((x (vector 'a 'b 'c 'd)))
-(hoop* ((:each-elt e :in x collect e))
-(a b c d))
+(define-test hoop.5.20
+  (is equal
+      '(a b c d)
+      (let ((x (vector 'a 'b 'c 'd)))
+        (hoop* ((:each-elt e :in x)
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.21
-(let ((x (vector 'a 'b 'c 'd)))
-(hoop* ((:each-elt e :in (the vector x) collect e))
-(a b c d))
+  :compile-at :execute
+  (is equal
+      '(a b c d)
+      (let ((x (vector 'a 'b 'c 'd)))
+        (hoop* ((:each-elt e :in (the vector x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.22
-(let ((x (vector 'a 'b 'c 'd)))
-(hoop* ((:each-elt e :in (the simple-vector x) collect e))
-(a b c d))
+  :compile-at :execute
+  (is equal
+      '(a b c d)
+      (let ((x (vector 'a 'b 'c 'd)))
+        (hoop* ((:each-elt e :in (the simple-vector x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.23
-(let ((x (vector '(a) '(b) '(c) '(d))))
-(hoop* ((:each-elt (e) :in x collect e))
-(a b c d))
+  :compile-at :execute
+  (is equal
+      '(a b c d)
+      (let ((x (vector '(a) '(b) '(c) '(d))))
+        (hoop* ((:each-elt (e) :in x)
+                (:collect foo))
+          (foo e)))))
 
-
-(define-test hoop.5.30
+#|(define-test hoop.5.30
 (let ((x (make-array '(5) :initial-contents '(a b c d e)
 :adjustable t)))
 (hoop* ((:each-elt e :in x collect e))
