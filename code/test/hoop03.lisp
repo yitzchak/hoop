@@ -74,35 +74,25 @@
               (:collect c))
         (c (list x y)))))
 
-#|(define-test hoop.3.10
-:compile-at :execute
+(define-test hoop.3.10
+  :compile-at :execute
   (is equal
       '(3 7 11)
-      (hoop* ((:each-sublist ((x y)) of-type (fixnum) :in '((1 2) (3 4) (5 6)))
+      (hoop* ((:each-sublist ((x y)) :in '((1 2) (3 4) (5 6)))
               (:collect c))
+        (declare (type fixnum x y))
         (c (+ x y)))))
 
-(define-test hoop.3.11
-:compile-at :execute
-  (is equal
-      '(3 7 11)
-(hoop* ((:each-sublist ((x y)) of-type (fixnum) :in '((1 2) (3 4) (5 6))
-collect (+ x y))
-)
-
-(define-test hoop.3.12
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist ((x y)) of-type ((fixnum fixnum)) :in '((1 2) (3 4) (5 6))
-collect (+ x y))
-(3 7 11))
+;;; hoop.3.11 and hoop.3.12 same as hoop.3.10
 
 (define-test hoop.3.13
-:compile-at :execute
-(is equal
-(hoop* ((:each-sublist ((x . y)) of-type ((fixnum . fixnum)) :in '((1 . 2) (3 . 4) (5 . 6))
-collect (+ x y))
-(3 7 11))|#
+  :compile-at :execute
+  (is equal
+      '(3 7 11)
+      (hoop* ((:each-sublist ((x . y)) :in '((1 . 2) (3 . 4) (5 . 6)))
+              (:collect c))
+        (declare (type fixnum x y))
+        (c (+ x y)))))
 
 (define-test hoop.3.14
   :compile-at :execute
@@ -136,49 +126,21 @@ collect (+ x y))
              (equal '((d e f) (e f) (f)))
              (equal '(a b c))))
 
-#|(define-test hoop.3.18
-(hoop* ((:each-sublist (x) of-type ((integer 0 10)) :in '(2 4 6 7) sum x)
-19)|#
+(define-test hoop.3.18
+  :compile-at :execute
+  (is equal
+      19
+      (hoop* ((:each-sublist (x) :in '(2 4 6 7))
+              (:sum c))
+        (declare (type (integer 0 10) x))
+        (c x))))
 
-;;; Tests of the 'AS' form
-
-#|(define-test hoop.3.19
-(hoop* as x :in '(1 2 3) sum (car x))
-6)
-
-(define-test hoop.3.20
-(hoop* as x :in '(a b c)
-as y :in '(1 2 3)
-collect (list (car x) (car y)))
-((a 1) (b 2) (c 3)))
-
-(define-test hoop.3.21
-(hoop* as x :in '(a b c)
-for y :in '(1 2 3)
-collect (list (car x) (car y)))
-((a 1) (b 2) (c 3)))
-
-(define-test hoop.3.22
-(hoop* ((:each-sublist x :in '(a b c)
-as y :in '(1 2 3)
-collect (list (car x) (car y)))
-((a 1) (b 2) (c 3)))
-
-(define-test hoop.3.23
-(let (a b (i 0))
-(values
-(hoop* ((:each-sublist e :in (progn (setf a (incf i))
-'(a b c d e f g))
-:by (progn (setf b (incf i)) #'cddr)
-collect (car e))
-a b i))
-(a c e g)
-1 2 2)
+;;; hoop.3.19 thru hoop.3.23 skipped since hoop has no AS
 
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-(define-test hoop.3.24
+#|(define-test hoop.3.24
 (macrolet
 ((%m (z) z))
 (hoop* ((:each-sublist x :in (expand-in-current-env (%m '(1 2 3))) sum (car x)))

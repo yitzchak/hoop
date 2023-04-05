@@ -18,6 +18,16 @@
               (:collect c))
         (c j))))
 
+(define-test loop.4.3
+  :compile-at :execute
+  (is equal
+      '(2 3 4 5 6 7 8 9 10 11)
+      (hoop* ((:step i :from 1 :to 10)
+              (:generate j :using (1+ i))
+              (:collect c))
+        (declare (type integer j))
+        (c j))))
+
 (define-test hoop.4.4
   :compile-at :execute
   (is equal

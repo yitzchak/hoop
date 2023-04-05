@@ -18,26 +18,16 @@
 
 (defmethod wrap-outer-form ((clause generate-clause) form)
   (if (listp (var-spec clause))
-      `(let (,(temp-var clause))
+      `(let ((,(temp-var clause) (multiple-value-list ,(using-form clause))))
          ,form)
-      form))
-
-(defmethod wrap-inner-form ((clause generate-clause) form)
-  (if (listp (var-spec clause))
-      `(let ,(bindings-from-d-var-spec (var-spec clause))
-         ,.(apply #'declarations
-                  (bindings-from-d-var-spec (var-spec clause)))
-         ,form)
-      `(let (,(var-spec clause))
-         ,.(declarations (var-spec clause))
+      `(let ((,(temp-var clause) ,(using-form clause)))
          ,form)))
 
-(defmethod initial-movable-forms ((clause generate-clause))
-  (if (listp (var-spec clause))
-      `((setq ,(temp-var clause) (multiple-value-list ,(using-form clause))
-              ,.(apply #'nconc (bindings-from-d-var-spec (var-spec clause)
-                                                         (temp-var clause)))))
-      `((setq ,(var-spec clause) ,(using-form clause)))))
+(defmethod wrap-inner-form ((clause generate-clause) form)
+  `(let ,(bindings-from-d-var-spec (var-spec clause) (temp-var clause))
+     ,.(apply #'declarations
+              (bindings-from-d-var-spec (var-spec clause)))
+     ,form))
 
 (defmethod next-movable-forms ((clause generate-clause))
   (if (listp (var-spec clause))
