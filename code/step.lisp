@@ -53,7 +53,7 @@
 (defmethod wrap-inner-form ((clause step-clause) form)
   (if (var-spec clause)
       `(let ((,(var-spec clause) ,(next-var clause)))
-         ,.(declarations (var-spec clause))
+         ,.(declarations (list (var-spec clause)))
          ,form)
       form))
 

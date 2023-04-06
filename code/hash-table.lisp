@@ -11,7 +11,7 @@
               :initform (gensym))))
 
 (defmethod declaration-targets ((clause hash-table-clause))
-  (bindings-from-d-var-spec (var-spec clause)))
+  (variable-names (var-spec clause)))
 
 (defmethod make-clause ((type (eql :each-key-value)) &rest initargs)
   (apply #'make-instance 'hash-table-clause :var-spec initargs))
@@ -29,8 +29,7 @@
                                      (next-key-var clause))
          ,.(bindings-from-d-var-spec (second (var-spec clause))
                                      (next-value-var clause)))
-     ,.(apply #'declarations
-              (bindings-from-d-var-spec (var-spec clause)))
+     ,.(declarations (variable-names (var-spec clause)))
      ,form))
 
 (defmethod initial-early-forms ((clause hash-table-clause))
@@ -46,8 +45,7 @@
       (hoop-finish))))
 
 (defmethod next-late-forms ((clause hash-table-clause))
-  `((setq ,.(apply #'nconc (bindings-from-d-var-spec (first (var-spec clause))
-                                                     (next-key-var clause)))
-          ,.(apply #'nconc (bindings-from-d-var-spec (second (var-spec clause))
-                                                     (next-value-var clause))))))
-
+  `((setq ,.(assignments-from-d-var-spec (first (var-spec clause))
+                                         (next-key-var clause))
+          ,.(assignments-from-d-var-spec (second (var-spec clause))
+                                         (next-value-var clause)))))

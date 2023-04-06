@@ -18,10 +18,10 @@
 
 (defmethod wrap-outer-form ((clause count-clause) form)
   `(let ((,(var-spec clause) (coerce 0 ',(get-type (var-spec clause)))))
-     ,.(declarations (var-spec clause))
+     ,.(declarations (list (var-spec clause)))
      (flet ((,(var-spec clause) (&rest args)
               (incf ,(var-spec clause) (count-if #'identity args))))
-       ,.(declarations `(function ,(var-spec clause)))
+       ,.(declarations (list `(function ,(var-spec clause))))
        ,form)))
 
 (defclass narg-numeric-clause (numeric-clause from-form-slot)
@@ -31,7 +31,7 @@
 (defmethod wrap-inner-form ((clause narg-numeric-clause) form)
   `(let ((,(var-spec clause) (coerce ,(from-form clause)
                                      ',(get-type (var-spec clause)))))
-     ,.(declarations (var-spec clause))
+     ,.(declarations (list (var-spec clause)))
      (flet ((,(var-spec clause) (&rest args)
               (setf ,(var-spec clause)
                     (if ,(var-spec clause)

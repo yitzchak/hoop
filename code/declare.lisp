@@ -60,7 +60,7 @@
     (when new-tail
       (list (nconc head new-tail)))))
 
-(defun declarations (&rest targets)
+(defun declarations (targets)
   (let ((specifiers (mapcan (lambda (specifier)
                               (case (car specifier)
                                 ((dynamic-extent ignorable ignore special)

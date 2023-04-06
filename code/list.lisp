@@ -23,7 +23,7 @@
 
 (defmethod declaration-targets ((clause list-clause))
   (unless (update clause)
-    (bindings-from-d-var-spec (var-spec clause))))
+    (variable-names (var-spec clause))))
 
 (defmethod wrap-outer-form ((clause list-clause) form)
   `(let (,.(when (update clause)
@@ -40,8 +40,7 @@
          ,form)
       `(let ,(bindings-from-d-var-spec (var-spec clause)
                                        `(car ,(next-list-var clause)))
-         ,.(apply #'declarations
-                  (bindings-from-d-var-spec (var-spec clause)))
+         ,.(declarations (variable-names (var-spec clause)))
         ,form)))
 
 (defmethod wrap-inner-form ((clause list-sublist-clause) form)
@@ -51,8 +50,7 @@
          ,form)
       `(let ,(bindings-from-d-var-spec (var-spec clause)
                                        (next-list-var clause))
-         ,.(apply #'declarations
-                  (bindings-from-d-var-spec (var-spec clause)))
+         ,.(declarations (variable-names (var-spec clause)))
          ,form)))
 
 (defmethod initial-early-forms ((clause list-clause))
@@ -80,9 +78,11 @@
 (defmethod next-late-forms ((clause list-item-clause))
   (if (update clause)
       `((setq ,(list-var clause) ,(next-list-var clause)))
-      `((setq ,.(apply #'nconc (bindings-from-d-var-spec (var-spec clause) `(car ,(next-list-var clause))))))))
+      `((setq ,.(assignments-from-d-var-spec (var-spec clause)
+                                             `(car ,(next-list-var clause)))))))
 
 (defmethod next-late-forms ((clause list-sublist-clause))
   (if (update clause)
       `((setq ,(list-var clause) ,(next-list-var clause)))
-      `((setq ,.(apply #'nconc (bindings-from-d-var-spec (var-spec clause) (next-list-var clause)))))))
+      `((setq ,.(assignments-from-d-var-spec (var-spec clause)
+                                             (next-list-var clause))))))

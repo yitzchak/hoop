@@ -23,7 +23,7 @@
 
 (defmethod declaration-targets ((clause sequence-clause))
   (unless (update clause)
-    (bindings-from-d-var-spec (var-spec clause))))
+    (variable-names (var-spec clause))))
 
 (defmethod wrap-outer-form ((clause sequence-clause) form)
   `(let (,(index clause)
@@ -46,8 +46,7 @@
       `(let ,(bindings-from-d-var-spec (var-spec clause)
                                        `(when ,(index clause)
                                           (elt ,(seq-var clause) ,(index clause))))
-         ,.(apply #'declarations
-                  (bindings-from-d-var-spec (var-spec clause)))
+         ,.(declarations (variable-names (var-spec clause)))
          ,form)))
 
 (defmethod initial-early-forms ((clause sequence-clause))
