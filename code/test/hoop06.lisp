@@ -257,23 +257,28 @@
 ;;; hoop.6.37 thru hoop.6.40 skipped because HOOP doesn't have the various
 ;;; keyword combinations.
 
-#|;;; Test that explicit calls to macroexpand in subforms
+;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
 (define-test hoop.6.41
-(macrolet
-((%m (z) z))
-(hoop* ((:each-key-value x being the hash-value :in
-(expand-in-current-env (%m *hoop.6.hash.1*)) sum x))
-6)
+  :compile-at :execute
+  (is equal
+      6
+      (macrolet ((%m (z) z))
+        (hoop* ((:each-key-value (nil x) :in (expand-in-current-env (%m *hoop.6.hash.1*)))
+                (:sum foo))
+          (foo x)))))
 
 (define-test hoop.6.42
-(macrolet
-((%m (z) z))
-(sort (hoop* ((:each-key-value x being the hash-key :in
-(expand-in-current-env (%m *hoop.6.hash.1*)) collect x)
-#'symbol<))
-(a b c))|#
+  :compile-at :execute
+  (is equal
+      '(a b c)
+      (macrolet
+          ((%m (z) z))
+        (sort (hoop* ((:each-key-value (x nil) :in (expand-in-current-env (%m *hoop.6.hash.1*)))
+                      (:collect foo))
+                (foo x))
+              #'symbol<))))
 
 ;;; Error tests
 

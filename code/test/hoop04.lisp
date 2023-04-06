@@ -76,48 +76,52 @@
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-#|(define-test hoop.4.9
-(macrolet
-((%m (z) z))
-(hoop
-for x = (expand-in-current-env (%m 1)) then (1+ x)
-until (> x 5)
-collect x))
-(1 2 3 4 5))
+(define-test hoop.4.9
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:generate x :using (expand-in-current-env (%m 1)) :then (1+ x))
+                (:until (> x 5))
+                (:collect foo))
+          (foo x)))))
 
 (define-test hoop.4.10
-(macrolet
-((%m (z) z))
-(hoop
-for x = 1 then (expand-in-current-env (%m (1+ x)))
-until (> x 5)
-collect x))
-(1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:generate x :using 1 :then (expand-in-current-env (%m (1+ x))))
+                (:until (> x 5))
+                (:collect foo))
+          (foo x)))))
 
 (define-test hoop.4.11
-(macrolet
-((%m (z) z))
-(hoop
-for x = 1 then (1+ x)
-until (expand-in-current-env (%m (> x 5)))
-collect x))
-(1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:generate x :using 1 :then (1+ x))
+                (:until (expand-in-current-env (%m (> x 5))))
+                (:collect foo))
+          (foo x)))))
 
 (define-test hoop.4.12
-(macrolet
-((%m (z) z))
-(hoop
-for x = 1 then (1+ x)
-while (expand-in-current-env (%m (<= x 5)))
-collect x))
-(1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:generate x :using 1 :then (1+ x))
+                (:while (expand-in-current-env (%m (<= x 5))))
+                (:collect foo))
+          (foo x)))))
 
 (define-test hoop.4.13
-(macrolet
-((%m (z) z))
-(hoop
-for x = 1 then (1+ x)
-until (> x 5)
-collect (expand-in-current-env (%m x))))
-(1 2 3 4 5))
-|#
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:generate x :using 1 :then (1+ x))
+                (:until (> x 5))
+                (:collect foo))
+          (foo (expand-in-current-env (%m x)))))))

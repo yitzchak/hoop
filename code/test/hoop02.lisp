@@ -132,61 +132,27 @@
         (declare (type (integer 0 10) x))
         (c x))))
 
-;;; Tests of the 'AS' ((:each-itemm
-
-#|(define-test hoop.2.19
-(hoop* as x :in '(1 2 3) sum x)
-6)
-
-(define-test hoop.2.20
-(hoop* as x :in '(a b c)
-as y :in '(1 2 3)
-collect (list x y))
-((a 1) (b 2) (c 3)))
-
-(define-test hoop.2.21
-(hoop* as x :in '(a b c)
-((:each-item y :in '(1 2 3)
-collect (list x y))
-((a 1) (b 2) (c 3)))
-
-(define-test hoop.2.22
-(hoop* ((:each-item x :in '(a b c)
-as y :in '(1 2 3)
-collect (list x y))
-((a 1) (b 2) (c 3)))
-
-(define-test hoop.2.23
-(let (a b (i 0))
-(values
-(hoop* ((:each-item e :in (progn (setf a (incf i))
-'(a b c d e f g))
-:by (progn (setf b (incf i)) #'cddr)
-collect e)
-a b i))
-(a c e g)
-1 2 2)
-
+;;; hoop.2.19 thru hoop.2.23 are skipped because HOOP doesn't have AS
 
 ;;; Test that explicit calls to macroexpand :in sub(:each-itemms
 ;;; are done :in the correct environment
 
 (define-test hoop.2.24
-(macrolet
-((%m (z) z))
-(hoop* ((:each-item x :in (expand-in-current-env (%m '(1 2 3))) sum x))
-6)
+  :compile-at :execute
+  (is equal
+      6
+      (macrolet ((%m (z) z))
+        (hoop* ((:each-item x :in (expand-in-current-env (%m '(1 2 3))))
+                (:sum foo))
+          (foo x)))))
 
 (define-test hoop.2.25
-(macrolet
-((%m (z) z))
-(hoop* ((:each-item (x . y) :in (expand-in-current-env (%m '((a . b) (c . d) (e . f))))
-collect (list x y)))
-((a b) (c d) (e f)))
+  :compile-at :execute
+  (is equal
+      '((a b) (c d) (e f))
+      (macrolet ((%m (z) z))
+        (hoop* ((:each-item (x . y) :in (expand-in-current-env (%m '((a . b) (c . d) (e . f)))))
+                (:collect foo))
+          (foo (list x y))))))
 
-(define-test hoop.2.26
-(macrolet
-((%m (z) z))
-(hoop* as x :in (expand-in-current-env (%m '(1 2 3))) sum x))
-6)
-|#
+;;; hoop.2.26 is skipped since HOOP doesn't have AS

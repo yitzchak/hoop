@@ -140,30 +140,33 @@
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-#|(define-test hoop.3.24
-(macrolet
-((%m (z) z))
-(hoop* ((:each-sublist x :in (expand-in-current-env (%m '(1 2 3))) sum (car x)))
-6)
+(define-test hoop.3.24
+  :compile-at :execute
+  (is equal
+      6
+      (macrolet ((%m (z) z))
+        (hoop* ((:each-sublist x :in (expand-in-current-env (%m '(1 2 3))))
+                (:sum foo))
+          (foo (car x))))))
 
 (define-test hoop.3.25
-(macrolet
-((%m (z) z))
-(hoop* ((:each-sublist e :in (expand-in-current-env (%m '(a b c d e f))) :by #'cddr
-collect (car e)))
-(a c e))
+  :compile-at :execute
+  (is equal
+      '(a c e)
+      (macrolet ((%m (z) z))
+        (hoop* ((:each-sublist e :in (expand-in-current-env (%m '(a b c d e f))) :by #'cddr)
+                (:collect foo))
+          (foo (car e))))))
 
 (define-test hoop.3.26
-(macrolet
-((%m (z) z))
-(hoop* ((:each-sublist e :in '(a b c d e f)
-:by (expand-in-current-env (%m #'cddr))
-collect (car e)))
-(a c e))
+  :compile-at :execute
+  (is equal
+      '(a c e)
+      (macrolet
+          ((%m (z) z))
+        (hoop* ((:each-sublist e :in '(a b c d e f)
+                 :by (expand-in-current-env (%m #'cddr)))
+                (:collect foo))
+          (foo (car e))))))
 
-(define-test hoop.3.27
-(macrolet
-((%m (z) z))
-(hoop* as x :in (expand-in-current-env (%m '(1 2 3))) sum (car x)))
-6)
-|#
+;;; hoop.3.27 skipped since HOOP does not have AS

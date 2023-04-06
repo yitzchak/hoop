@@ -509,65 +509,82 @@
 ;;; Test that explicit calls :to macroexpand in subforms
 ;;; are done in the correct environment
 
-#|(define-test hoop.1.57
-(macrolet
-((%m (z) z))
-(hoop* ((:step i :from (expand-in-current-env (%m 1)) :to 5 collect i))
-(1 2 3 4 5))
+(define-test hoop.1.57
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from (expand-in-current-env (%m 1)) :to 5)
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.58
-(macrolet
-((%m (z) z))
-(hoop* ((:step i :from 1 :to (expand-in-current-env (%m 5)) collect i))
-(1 2 3 4 5))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from 1 :to (expand-in-current-env (%m 5)))
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.59
-(macrolet
-((%m (z) z))
-(hoop* ((:step i :from 1 :to 5 :by (expand-in-current-env (%m 2)) collect i))
-(1 3 5))
+  :compile-at :execute
+  (is equal
+      '(1 3 5)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from 1 :to 5 :by (expand-in-current-env (%m 2)))
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.60
-(macrolet
-((%m (z) z))
-(hoop* ((:step i down:from (expand-in-current-env (%m 10))
-:to 3
-collect i))
-(10 9 8 7 6 5 4 3))
+  :compile-at :execute
+  (is equal
+      '(10 9 8 7 6 5 4 3)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from (expand-in-current-env (%m 10)) :by -1 :to 3)
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.61
-(macrolet
-((%m (z) z))
-(hoop* ((:step i down:from 10
-:to (expand-in-current-env (%m 3))
-collect i))
-(10 9 8 7 6 5 4 3))
+  :compile-at :execute
+  (is equal
+      '(10 9 8 7 6 5 4 3)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from 10 :to (expand-in-current-env (%m 3)) :by -1)
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.62
-(macrolet
-((%m (z) z))
-(hoop* ((:step i :from (expand-in-current-env (%m 10))
-downto 3
-collect i))
-(10 9 8 7 6 5 4 3))
+  :compile-at :execute
+  (is equal
+      '(10 9 8 7 6 5 4 3)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from (expand-in-current-env (%m 10)) :to 3 :by -1)
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.63
-(macrolet
-((%m (z) z))
-(hoop* ((:step i :from 10
-downto (expand-in-current-env (%m 3))
-collect i))
-(10 9 8 7 6 5 4 3))
+  (is equal
+      '(10 9 8 7 6 5 4 3)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from 10 :to (expand-in-current-env (%m 3)) :by -1)
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.64
-(macrolet
-((%m (z) z))
-(hoop* ((:step i :from (expand-in-current-env (%m 1)) below 5 collect i))
-(1 2 3 4))
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from (expand-in-current-env (%m 1)) :before 5)
+                (:collect foo))
+          (foo i)))))
 
 (define-test hoop.1.65
-(macrolet
-((%m (z) z))
-(hoop*  ((:step i :from 1 below (expand-in-current-env (%m 5)) collect i))
-(1 2 3 4))
-|#
+  :compile-at :execute
+  (is equal
+      '(1 2 3 4)
+      (macrolet ((%m (z) z))
+        (hoop* ((:step i :from 1 :before (expand-in-current-env (%m 5)))
+                (:collect foo))
+          (foo i)))))
