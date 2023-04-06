@@ -12,6 +12,8 @@
         ((:file "packages")
          (:file "types"
           :depends-on ("packages"))
+         (:file "declare"
+          :depends-on ("packages"))
          (:file "clause"
           :depends-on ("packages"))
          (:file "accumulate"
@@ -35,7 +37,8 @@
          (:file "sequence"
           :depends-on ("clause"))
          (:file "step"
-          :depends-on ("clause"))
+          :depends-on ("clause"
+                       "declare"))
          (:file "termination"
           :depends-on ("clause"))
          (:file "with"
@@ -46,6 +49,7 @@
           :depends-on ("clause"))
          (:file "macro"
           :depends-on ("clause"
+                       "declare"
                        "analysis"))))))
 
 (asdf:defsystem :hoop/test

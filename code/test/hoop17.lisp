@@ -152,12 +152,12 @@
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-#|(define-test hoop.17.22
-(macrolet
-((%m (z) z))
-(hoop* :with x := 0
-:prologue (expand-in-current-env (%m (incf x)))
-:until t
-:epilogue (expand-in-current-env (%m (return x)))))
-1)
-|#
+(define-test hoop.17.22
+  :compile-at :execute
+  (is equal
+      1
+      (macrolet ((%m (z) z))
+        (hoop* ((:with x := 0)
+                (:prologue (expand-in-current-env (%m (incf x))))
+                (:until t)
+                (:epilogue (expand-in-current-env (%m (return x)))))))))

@@ -21,6 +21,9 @@
                       (c x)))
             #'string<)))
 
+;;; hoop.7.2 thru hoop.7.8 skipped since HOOP does not the various keyword
+;;; permutations of LOOP
+
 (define-test hoop.7.9
   :compile-at :execute
   (is equal
@@ -30,6 +33,8 @@
                             (:collect c))
                       (c x)))
             #'string<)))
+
+;;; hoop.7.10 skipped since HOOP does not the various keyword permutations of LOOP
 
 (define-test hoop.7.11
   :compile-at :execute
@@ -79,7 +84,6 @@
 ;;; form.
 
 (define-test hoop.7.15
-  :compile-at :execute
   (is equal
       '("A" "B" "BAR" "BAZ" "C" "FOO")
       (let ((*package* (find-package "HOOP.CL-TEST.1")))
@@ -90,7 +94,6 @@
               #'string<))))
 
 (define-test hoop.7.16
-  :compile-at :execute
   (is equal
       '("A" "B" "C")
       (let ((*package* (find-package "HOOP.CL-TEST.1")))
@@ -169,34 +172,68 @@
 
 ;;; Type specs
 
-#|(define-test hoop.7.24
-(hoop* for x t being the symbols of "HOOP.CL-TEST.1" count x)
-6)
+(define-test hoop.7.24
+  :compile-at :execute
+  (is equal
+      6
+      (hoop* ((:each-symbol x :in "HOOP.CL-TEST.1"
+               :symbol-types (:external :internal))
+              (:count c))
+        (declare (type t x))
+        (c x))))
 
 (define-test hoop.7.25
-(hoop* for x t being the external-symbols of "HOOP.CL-TEST.1" count x)
-3)
+  :compile-at :execute
+  (is equal
+      3
+      (hoop* ((:each-symbol x :in "HOOP.CL-TEST.1")
+              (:count c))
+        (declare (type t x))
+        (c x))))
 
 (define-test hoop.7.26
-(hoop* for x t being the present-symbols of "HOOP.CL-TEST.2" count x)
-3)
+  :compile-at :execute
+  (is equal
+      6
+      (hoop* ((:each-symbol x :in "HOOP.CL-TEST.2"
+               :symbol-types (:external :internal :inherited))
+              (:count c))
+        (declare (type t x))
+        (c x))))
 
 (define-test hoop.7.27
-(hoop* for x of-type symbol being the symbols of "HOOP.CL-TEST.1" count x)
-6)
+  :compile-at :execute
+  (is equal
+      6
+      (hoop* ((:each-symbol x :in "HOOP.CL-TEST.1"
+               :symbol-types (:external :internal))
+              (:count c))
+        (declare (type symbol x))
+        (c x))))
 
 (define-test hoop.7.28
-(hoop* for x of-type symbol being the external-symbols of "HOOP.CL-TEST.1" count x)
-3)
+  :compile-at :execute
+  (is equal
+      3
+      (hoop* ((:each-symbol x :in "HOOP.CL-TEST.1")
+              (:count c))
+        (declare (type symbol x))
+        (c x))))
 
 (define-test hoop.7.29
-(hoop* for x of-type symbol being the present-symbols of "HOOP.CL-TEST.2" count x)
-3)
+  :compile-at :execute
+  (is equal
+      6
+      (hoop* ((:each-symbol x :in "HOOP.CL-TEST.2"
+               :symbol-types (:external :internal :inherited))
+              (:count c))
+        (declare (type symbol x))
+        (c x))))
 
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-(define-test hoop.7.33
+#|(define-test hoop.7.33
 (macrolet
 ((%m (z) z))
 (sort (mapcar #'symbol-name

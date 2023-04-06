@@ -12,10 +12,16 @@
 (defmethod make-clause ((type (eql :count)) &rest initargs)
   (apply #'make-instance 'count-clause :var-spec initargs))
 
+(defmethod declaration-targets ((clause count-clause))
+  `(,(var-spec clause)
+    (function ,(var-spec clause))))
+
 (defmethod wrap-outer-form ((clause count-clause) form)
-  `(let ((,(var-spec clause) 0))
+  `(let ((,(var-spec clause) (coerce 0 ',(get-type (var-spec clause)))))
+     ,.(declarations (list (var-spec clause)))
      (flet ((,(var-spec clause) (&rest args)
               (incf ,(var-spec clause) (count-if #'identity args))))
+       ,.(declarations (list `(function ,(var-spec clause))))
        ,form)))
 
 (defclass narg-numeric-clause (numeric-clause from-form-slot)
@@ -23,13 +29,20 @@
              :initarg :operator)))
 
 (defmethod wrap-inner-form ((clause narg-numeric-clause) form)
-  `(let ((,(var-spec clause) ,(from-form clause)))
+  `(let ((,(var-spec clause) (coerce ,(from-form clause)
+                                     ',(get-type (var-spec clause)))))
+     ,.(declarations (list (var-spec clause)))
      (flet ((,(var-spec clause) (&rest args)
               (setf ,(var-spec clause)
                     (if ,(var-spec clause)
                         (apply ,(operator clause) ,(var-spec clause) args)
                         (apply ,(operator clause) args)))))
+       ,.(declarations `(function ,(var-spec clause)))
        ,form)))
+
+(defmethod declaration-targets ((clause narg-numeric-clause))
+  `(,(var-spec clause)
+    (function ,(var-spec clause))))
 
 (defmethod make-clause ((type (eql :sum)) &rest initargs)
   (apply #'make-instance 'narg-numeric-clause

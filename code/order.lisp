@@ -22,6 +22,9 @@
                                        (apply #'make-clause args))
                                      initargs)))
 
+(defmethod declaration-targets ((clause order-clause))
+  (mapcan #'declaration-targets (subclauses clause)))
+
 (defmethod wrap-outer-form ((clause parallel-clause) form)
   (reduce #'wrap-outer-form (subclauses clause)
           :from-end t

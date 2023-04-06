@@ -16,7 +16,7 @@
   ((before :reader before
        :initarg :before)
    (before-var :reader before-var
-           :initform (gensym))))
+               :initform (gensym))))
 
 (defmethod make-clause ((keyword (eql :step)) &rest initargs)
   (apply #'make-instance (cond ((getf (cdr initargs) :to)
@@ -26,6 +26,9 @@
                                (t
                                 'step-clause))
          :var-spec initargs))
+
+(defmethod declaration-targets ((clause step-clause))
+  (list (var-spec clause)))
 
 (defmethod wrap-outer-form ((clause step-clause) form)
   `(let ,(assemble-in-order clause
@@ -49,7 +52,8 @@
 
 (defmethod wrap-inner-form ((clause step-clause) form)
   (if (var-spec clause)
-      `(let (,(var-spec clause))
+      `(let ((,(var-spec clause) ,(next-var clause)))
+         ,.(declarations (list (var-spec clause)))
          ,form)
       form))
 
@@ -66,10 +70,6 @@
                 (and (minusp ,(by-var clause))
                      (> ,(next-var clause) ,(before-var clause))))
       (hoop-finish))))
-
-(defmethod initial-late-forms ((clause step-clause))
-  (when (var-spec clause)
-    `((setq ,(var-spec clause) ,(next-var clause)))))
 
 (defmethod next-early-forms ((clause step-clause))
   `((incf ,(next-var clause) ,(by-var clause))))

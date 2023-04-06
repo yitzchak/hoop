@@ -43,66 +43,117 @@
               (:collect c))
         (c e))))
 
-#|
+(define-test hoop.5.6
+  :compile-at :execute
+  (is equal
+      '(#\a #\b #\c)
+      (hoop* ((:each-elt e :in "abcd" :end 3)
+              (:collect c))
+        (declare (type (or null base-char) e))
+        (c e))))
 
 (define-test hoop.5.7
-(let ((x (make-array '(4) :initial-contents "abcd" :element-type 'base-char)))
-(hoop* ((:each-elt e :in (the base-string x) collect e))
-(#\a #\b #\c #\d))
+  :compile-at :execute
+  (is equal
+      '(#\a #\b #\c #\d)
+      (let ((x (make-array '(4) :initial-contents "abcd" :element-type 'base-char)))
+        (hoop* ((:each-elt e :in (the base-string x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.8
-(let ((x "abcd")) (hoop* ((:each-elt e of-type character :in x collect e))
-(#\a #\b #\c #\d))
+  :compile-at :execute
+  (is equal
+      '(#\a #\b #\c #\d)
+      (let ((x (make-array '(4) :initial-contents "abcd" :element-type 'base-char)))
+        (hoop* ((:each-elt e :in (the base-string x))
+                (:collect foo))
+          (declare (type character e))
+          (foo e)))))
 
 (define-test hoop.5.10
-(let ((x #*00010110))
-(hoop* ((:each-elt e :in x collect e))
-(0 0 0 1 0 1 1 0))
+  :compile-at :execute
+  (is equal
+      '(0 0 0 1 0 1 1 0)
+      (let ((x #*00010110))
+        (hoop* ((:each-elt e :in x)
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.11
-(let ((x #*00010110))
-(hoop* ((:each-elt e :in (the bit-vector x) collect e))
-(0 0 0 1 0 1 1 0))
+  :compile-at :execute
+  (is equal
+      '(0 0 0 1 0 1 1 0)
+      (let ((x #*00010110))
+        (hoop* ((:each-elt e :in (the bit-vector x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.12
-(let ((x #*00010110))
-(hoop* ((:each-elt e :in (the simple-bit-vector x) collect e))
-(0 0 0 1 0 1 1 0))
+  :compile-at :execute
+  (is equal
+      '(0 0 0 1 0 1 1 0)
+      (let ((x #*00010110))
+        (hoop* ((:each-elt e :in (the simple-bit-vector x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.13
-(let ((x #*00010110))
-(hoop* ((:each-elt e of-type bit :in (the simple-bit-vector x) collect e))
-(0 0 0 1 0 1 1 0))
+  :compile-at :execute
+  (is equal
+      '(0 0 0 1 0 1 1 0)
+      (let ((x #*00010110))
+        (hoop* ((:each-elt e :in (the simple-bit-vector x))
+                (:collect foo))
+          (declare (type bit e))
+          (foo e)))))
 
 (define-test hoop.5.14
-(let ((x #*00010110))
-(hoop* ((:each-elt e of-type bit :in x
-((:each-elt i from 1 to 4 collect e))
-(0 0 0 1))
-
+  :compile-at :execute
+  (is equal
+      '(0 0 0 1)
+      (let ((x #*00010110))
+        (hoop* ((:each-elt e :in x :end 4)
+                (:collect foo))
+          (declare (type bit e))
+          (foo e)))))
 
 (define-test hoop.5.20
-(let ((x (vector 'a 'b 'c 'd)))
-(hoop* ((:each-elt e :in x collect e))
-(a b c d))
+  (is equal
+      '(a b c d)
+      (let ((x (vector 'a 'b 'c 'd)))
+        (hoop* ((:each-elt e :in x)
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.21
-(let ((x (vector 'a 'b 'c 'd)))
-(hoop* ((:each-elt e :in (the vector x) collect e))
-(a b c d))
+  :compile-at :execute
+  (is equal
+      '(a b c d)
+      (let ((x (vector 'a 'b 'c 'd)))
+        (hoop* ((:each-elt e :in (the vector x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.22
-(let ((x (vector 'a 'b 'c 'd)))
-(hoop* ((:each-elt e :in (the simple-vector x) collect e))
-(a b c d))
+  :compile-at :execute
+  (is equal
+      '(a b c d)
+      (let ((x (vector 'a 'b 'c 'd)))
+        (hoop* ((:each-elt e :in (the simple-vector x))
+                (:collect foo))
+          (foo e)))))
 
 (define-test hoop.5.23
-(let ((x (vector '(a) '(b) '(c) '(d))))
-(hoop* ((:each-elt (e) :in x collect e))
-(a b c d))
+  :compile-at :execute
+  (is equal
+      '(a b c d)
+      (let ((x (vector '(a) '(b) '(c) '(d))))
+        (hoop* ((:each-elt (e) :in x)
+                (:collect foo))
+          (foo e)))))
 
-
-(define-test hoop.5.30
+#|(define-test hoop.5.30
 (let ((x (make-array '(5) :initial-contents '(a b c d e)
 :adjustable t)))
 (hoop* ((:each-elt e :in x collect e))

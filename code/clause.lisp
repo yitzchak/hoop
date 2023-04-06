@@ -2,6 +2,11 @@
 
 (defgeneric make-clause (type &rest initargs))
 
+(defgeneric declaration-targets (clause)
+  (:method (clause)
+    (declare (ignore clause))
+    nil))
+
 (defgeneric wrap-outer-form (clause form)
   (:method (clause form)
     (declare (ignore clause))
@@ -134,17 +139,32 @@
             (getf mapping indicator))
           (initargs-order clause)))
 
-(defun bindings-from-d-var-spec (var-spec &optional form)
+(defun map-d-var-spec (function var-spec form)
   (check-type var-spec (or symbol cons))
-  (cond ((null var-spec)
-         nil)
-        ((symbolp var-spec)
-         `((,var-spec ,form)))
-        (t
-         (nconc (bindings-from-d-var-spec (car var-spec) (when form
-                                                           `(car ,form)))
-                (bindings-from-d-var-spec (cdr var-spec) (when form
-                                                           `(cdr ,form)))))))
+  (if (consp var-spec)
+      (nconc (map-d-var-spec function
+                             (car var-spec)
+                             (when form
+                               `(car ,form)))
+             (map-d-var-spec function
+                             (cdr var-spec)
+                             (when form
+                               `(cdr ,form))))
+      (funcall function var-spec form)))
+
+(defun bindings-from-d-var-spec (var-spec &optional form)
+  (map-d-var-spec (lambda (var form)
+                    (when var
+                      (if form
+                          `((,var ,form))
+                          `(,var))))
+                  var-spec form))
+
+(defun assignments-from-d-var-spec (var-spec &optional form)
+  (map-d-var-spec (lambda (var form)
+                    (when var
+                      `(,var ,form)))
+                  var-spec form))
 
 (defgeneric variable-names (object)
   (:method (object)

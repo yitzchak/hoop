@@ -5,10 +5,10 @@ similar to the builtin LOOP facility. Unlike LOOP it separates clauses
 that create bindings or iteration from body forms which LOOP calls
 unconditional, conditional or selectable clauses.
 
-HOOP is still experimental. It does not have type declarations or much
-type checking yet. It has all of the functionality of LOOP and some
-additional functionality such as the ability to update values in lists
-or sequences. Generally there is a simple translation between LOOP and
+HOOP is still experimental. It does not have much type checking
+yet. It has all of the functionality of LOOP and some additional
+functionality such as the ability to update values in lists or
+sequences. Generally there is a simple translation between LOOP and
 HOOP. For example using LOOP to collect generate
 `'((1 . a) (3 . c) (5 . e))` could be done with:
 
@@ -60,6 +60,7 @@ Using HOOP this can be done with:
      (:after form*)
      (:parallel clause*)
      (:serial clause*))
+  declaration*
   tagbody-form*)
 ```
 
