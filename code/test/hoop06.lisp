@@ -75,6 +75,9 @@
               (:sum c))
         (c x))))
 
+;;; hoop.6.2 thru hoop.6.5 skipped because HOOP doesn't have the various
+;;; keyword combinations.
+
 (define-test hoop.6.6
   :compile-at :execute
   (is equal
@@ -83,6 +86,9 @@
                     (:collect c))
               (c x))
             #'symbol<)))
+
+;;; hoop.6.7 thru hoop.6.10 skipped because HOOP doesn't have the various
+;;; keyword combinations.
 
 (define-test hoop.6.11
   :compile-at :execute
@@ -155,15 +161,20 @@
               (:count c))
         (c t))))
 
+;;; hoop.6.20 thru hoop.6.21 skipped because HOOP doesn't have the various
+;;; keyword combinations.
+
 (define-test hoop.6.23
   :compile-at :execute
   (is equal
       6
       (hoop* ((:each-key-value (nil v) :in *hoop.6.hash.1*)
               (:sum c))
-        (declare (type fixnum c)
-                 (type (or null fixnum) v))
+        (declare (type fixnum c v))
         (c v))))
+
+;;; hoop.6.24 skipped because HOOP doesn't have the various
+;;; keyword combinations.
 
 (define-test hoop.6.25
   :compile-at :execute
@@ -171,7 +182,59 @@
       6
       (hoop* ((:each-key-value (k nil) :in *hoop.6.hash.5*)
               (:sum c))
+        (declare (type fixnum c k))
         (c k))))
+
+;;; hoop.6.26 skipped because HOOP doesn't have the various
+;;; keyword combinations.
+
+(define-test hoop.6.27
+  :compile-at :execute
+  (is equal
+      6
+      (hoop* ((:each-key-value (k nil) :in *hoop.6.hash.5*)
+              (:sum c))
+        (declare (type t k))
+        (c k))))
+
+;;; hoop.6.28 skipped because HOOP doesn't have the various
+;;; keyword combinations.
+
+(define-test hoop.6.29
+  :compile-at :execute
+  (is equal
+      6
+      (hoop* ((:each-key-value (nil v) :in *hoop.6.hash.1*)
+              (:sum c))
+        (declare (type t v))
+        (c v))))
+
+;;; hoop.6.30 skipped because HOOP doesn't have the various
+;;; keyword combinations.
+
+#+(or)(define-test hoop.6.31
+  :compile-at :execute
+  (is equal
+      6.0
+      (hoop* ((:each-key-value (nil v) :in *hoop.6.hash.1*)
+              (:sum c))
+        (declare (type float c v))
+        (c v))))
+
+;;; hoop.6.32 skipped because HOOP doesn't have the various
+;;; keyword combinations.
+
+#+(or)(define-test hoop.6.33
+  :compile-at :execute
+  (is equal
+      6.0
+      (hoop* ((:each-key-value (k nil) :in *hoop.6.hash.1*)
+              (:sum c))
+        (declare (type float c k))
+        (c k))))
+
+;;; hoop.6.34 skipped because HOOP doesn't have the various
+;;; keyword combinations.
 
 (define-test hoop.6.35
   :compile-at :execute
@@ -179,6 +242,7 @@
       21
       (hoop* ((:each-key-value ((k1 . k2) nil) :in *hoop.6.hash.8*)
               (:sum c))
+        (declare (type integer c k1 k2))
         (c k1 k2))))
 
 (define-test hoop.6.36
@@ -187,7 +251,11 @@
       21
       (hoop* ((:each-key-value (nil (v1 . v2)) :in *hoop.6.hash.9*)
               (:sum c))
+        (declare (type integer c v1 v2))
         (c v1 v2))))
+
+;;; hoop.6.37 thru hoop.6.40 skipped because HOOP doesn't have the various
+;;; keyword combinations.
 
 #|;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
@@ -205,46 +273,38 @@
 (sort (hoop* ((:each-key-value x being the hash-key :in
 (expand-in-current-env (%m *hoop.6.hash.1*)) collect x)
 #'symbol<))
-(a b c))
+(a b c))|#
 
 ;;; Error tests
 
 (define-test hoop.6.error.1
-(signals-error
-(hoop* ((:each-key-value k from 1 to 10
-((:each-key-value k being the hash-keys :in *hoop.6.hash.1*
-count t)
-program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:step k :from 1 :to 10)
+                        (:each-key-value (k nil) :in *hoop.6.hash.1*)
+                        (:count foo))
+                  (foo t))
+                program-error))
 
 (define-test hoop.6.error.2
-(signals-error
-(hoop* ((:each-key-value k being the hash-keys :in *hoop.6.hash.1*
-((:each-key-value k from 1 to 10
-count t)
-program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:each-key-value (k nil) :in *hoop.6.hash.1*)
+                        (:step k :from 1 :to 10)
+                        (:count foo))
+                  (foo t))
+                program-error))
 
 (define-test hoop.6.error.3
-(signals-error
-(hoop* ((:each-key-value (k . k) being the hash-keys :in *hoop.6.hash.3*
-count t)
-program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:each-key-value ((k . k) nil) :in *hoop.6.hash.3*)
+                        (:count foo))
+                  (foo t))
+                program-error))
 
 (define-test hoop.6.error.4
-(signals-error
-(hoop* ((:each-key-value k being the hash-keys :in *hoop.6.hash.3*
-using (hash-value k)
-count t)
-program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:each-key-value (k k) :in *hoop.6.hash.3*)
+                        (:count foo))
+                  (foo t))
+                program-error))
 
-(define-test hoop.6.error.5
-(signals-error
-(hoop* ((:each-key-value k being the hash-values :in *hoop.6.hash.3*
-using (hash-key k)
-count t)
-program-error)
-t)
-|#
+;;; hoop.6.error.5 skipped since it is the same as hoop.6.error.4 in HOOP
