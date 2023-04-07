@@ -34,7 +34,7 @@
                                                   ,.(initial-late-forms clause)
                                                 ,before-tag
                                                   ,.(before-forms clause)
-                                                  ,.forms
+                                                  ,@forms
                                                 ,after-tag
                                                   ,.(after-forms clause)
                                                   ,.(next-early-forms clause)
