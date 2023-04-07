@@ -233,33 +233,37 @@
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
-#|(define-test hoop.7.33
-(macrolet
-((%m (z) z))
-(sort (mapcar #'symbol-name
-(hoop* for x being the symbols of
-(expand-in-current-env (%m "HOOP.CL-TEST.1"))
-collect x))
-#'string<))
-("A" "B" "BAR" "BAZ" "C" "FOO"))
+(define-test hoop.7.33
+  :compile-at :execute
+  (is equal
+      '("A" "B" "BAR" "BAZ" "C" "FOO")
+      (macrolet ((%m (z) z))
+        (sort (mapcar #'symbol-name
+                      (hoop* ((:each-symbol x :in (expand-in-current-env (%m "HOOP.CL-TEST.1"))
+                               :symbol-types (:external :internal :inherited))
+                              (:collect foo))
+                        (foo x)))
+              #'string<))))
 
 (define-test hoop.7.34
-(macrolet
-((%m (z) z))
-(sort (mapcar #'symbol-name
-(hoop* for x being the external-symbols of
-(expand-in-current-env (%m "HOOP.CL-TEST.1"))
-collect x))
-#'string<))
-("A" "B" "C"))
+  :compile-at :execute
+  (is equal
+      '("A" "B" "C")
+      (macrolet ((%m (z) z))
+        (sort (mapcar #'symbol-name
+                      (hoop* ((:each-symbol x :in (expand-in-current-env (%m "HOOP.CL-TEST.1")))
+                              (:collect foo))
+                        (foo x)))
+              #'string<))))
 
 (define-test hoop.7.35
-(macrolet
-((%m (z) z))
-(sort (mapcar #'symbol-name
-(hoop* for x being the present-symbols of
-(expand-in-current-env (%m "HOOP.CL-TEST.2"))
-collect x))
-#'string<))
-("X" "Y" "Z"))
-|#
+  :compile-at :execute
+  (is equal
+      '("X" "Y" "Z")
+      (macrolet ((%m (z) z))
+        (sort (mapcar #'symbol-name
+                      (hoop* ((:each-symbol x :in (expand-in-current-env (%m "HOOP.CL-TEST.2"))
+                               :symbol-types (:external :internal))
+                              (:collect foo))
+                        (foo x)))
+              #'string<))))

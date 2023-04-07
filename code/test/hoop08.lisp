@@ -60,101 +60,113 @@
         (declare (type float a))
         (return a))))
 
-#|(define-test hoop.8.8
-(hoop* with a of-type string = "abc" return a)
-"abc")
+(define-test hoop.8.8
+  :compile-at :execute
+  (is equal
+"abc"
+      (hoop* ((:with a := "abc"))
+        (declare (type string a))
+        (return a))))
 
 (define-test hoop.8.9
-(hoop* with (a b) = '(1 2) return (list b a))
-(2 1))
+  :compile-at :execute
+  (is equal
+      '(2 1)
+      (hoop* ((:with ((a b)) := '(1 2)))
+        (return (list b a)))))
 
 (define-test hoop.8.10
-(hoop* with (a b) of-type (fixnum fixnum) = '(3 4) return (+ a b))
-7)
+  :compile-at :execute
+  (is equal
+      7
+      (hoop* ((:with ((a b)) := '(3 4)))
+        (declare (type fixnum a b))
+        (return (+ a b)))))
 
-(define-test hoop.8.11
-(hoop* with a of-type fixnum return a)
-0)
-
-(define-test hoop.8.12
-(hoop* with a of-type float return a)
-0.0)
-
-(define-test hoop.8.13
-(hoop* with a of-type t return a)
-nil)
-
-(define-test hoop.8.14
-(hoop* with a t return a)
-nil)
-
-(define-test hoop.8.15
-(hoop* with a t and b t return (list a b))
-(nil nil))
-
-(define-test hoop.8.16
-(hoop* with (a b c) of-type (fixnum float t) return (list a b c))
-(0 0.0 nil))
-
-(define-test hoop.8.17
-(hoop* with nil = nil return nil)
-nil)
+;;; hoop.8.11 thru hoop.8.17 skipped since HOOP doesn't pick default values.
 
 ;;; The NIL block of a hoop encloses the entire hoop.
 
 (define-test hoop.8.18
-(hoop* with nil = (return t) return nil)
-t)
+  :compile-at :execute
+  (is equal
+      t
+      (hoop* ((:with nil := (return t)))
+        (return nil))))
 
 (define-test hoop.8.19
-(hoop* with (nil a) = '(1 2) return a)
-2)
+  :compile-at :execute
+  (is equal
+      2
+      (hoop* ((:with ((nil a)) := '(1 2)))
+        (return a))))
 
 (define-test hoop.8.20
-(hoop* with (a nil) = '(1 2) return a)
-1)
+  :compile-at :execute
+  (is equal
+      1
+      (hoop* ((:with ((a nil)) := '(1 2)))
+        (return a))))
 
 (define-test hoop.8.21
-(hoop* with b = 3
-and (a nil) = '(1 2) return (list a b))
-(1 3))
+  :compile-at :execute
+  (is equal
+      '(1 3)
+      (hoop* ((:parallel (:with b := 3)
+                         (:with ((a nil)) := '(1 2))))
+        (return (list a b)))))
 
 (define-test hoop.8.22
-(hoop* with b = 3
-and (nil a) = '(1 2) return (list a b))
-(2 3))
+  :compile-at :execute
+  (is equal
+      '(2 3)
+      (hoop* ((:parallel (:with b := 3)
+                         (:with ((nil a)) := '(1 2))))
+        (return (list a b)))))
 
 ;;; The NIL block of a hoop encloses the entire hoop.
 
 (define-test hoop.8.23
-(hoop
-with a = 1
-and  b = (return 2)
-return 3)
-2)
+  :compile-at :execute
+  (is equal
+      2
+      (hoop* ((:parallel (:with a := 1)
+                         (:with b := (return 2))))
+        (return 3))))
 
 ;;; Test that explicit calls to macroexpand in subforms
 ;;; are done in the correct environment
 
 (define-test hoop.8.24
-(macrolet
-((%m (z) z))
-(hoop* with x = (expand-in-current-env (%m 1)) do (return x)))
-1)
+  :compile-at :execute
+  (is equal
+      1
+      (macrolet ((%m (z) z))
+        (hoop* ((:with x := (expand-in-current-env (%m 1))))
+          (return x)))))
 
 ;;; Test that the variable list may be shorter than values list.
 
 (define-test hoop.8.25
-(hoop* with (a b) = '(1)
-for (c d) = '(2)
-do (return (values a b c d)))
-1 nil 2 nil)
+  :compile-at :execute
+  (is-values (hoop* ((:with ((a b)) := '(1))
+                     (:with ((c d)) := '(2)))
+               (return (values a b c d)))
+             (equal 1)
+             (equal nil)
+             (equal 2)
+             (equal nil)))
 
 (define-test hoop.8.26
-(hoop* with (a b . rest) = '(1)
-for (c d) = '(2)
-do (return (values a b c d rest)))
-1 nil 2 nil nil)
+  :compile-at :execute
+  (is-values (hoop* ((:with ((a b . rest)) := '(1))
+                     (:with ((c d)) := '(2)))
+               (return (values a b c d rest)))
+             (equal 1)
+             (equal nil)
+             (equal 2)
+             (equal nil)
+             (equal nil)))
 
 ;;; Error cases
 
@@ -169,16 +181,15 @@ do (return (values a b c d rest)))
 ;;; I am interpreting the spec as ruling out the latter as well.
 
 (define-test hoop.8.error.1
-(signals-error
-(hoop* with a = 1
-and  a = 2 return a)
-program-error)
-t)
+  :compile-at :execute
+  (fail-compile (hoop* ((:parallel (:with a := 1)
+                                   (:with a := 2)))
+                  (return a))
+                program-error))
 
 (define-test hoop.8.error.2
-(signals-error
-(hoop* with a = 1
-with a = 2 return a)
-program-error)
-t)
-|#
+  :compile-at :execute
+  (fail-compile (hoop* ((:with a := 1)
+                        (:with a := 2))
+                  (return a))
+                program-error))
