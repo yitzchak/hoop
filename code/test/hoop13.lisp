@@ -45,25 +45,27 @@ multiple-values-limit))))
 (vals (make-list limit :initial-element :a))
 (vals2 (multiple-value-list (eval `(hoop* return (values ,@vals))))))
 (equalt vals vals2))
-t)
+t)|#
 
 (define-test hoop.13.9
-(hoop* named foo return 'a)
-a)
+  :compile-at :execute
+  (is equal
+      'a
+      (hoop* ((:named foo))
+        (return 'a))))
 
-(define-test hoop.13.10
-(block nil
-(return (hoop* named foo return :good))
-:bad)
-:good)
+;; hoop.13.10 skipped since HOOP doesn't have a selectable return
 
 (define-test hoop.13.11
-(block nil
-(hoop* named foo do (return :good))
-:bad)
-:good)
+  :compile-at :execute
+  (is equal
+      :good
+      (block nil
+        (return (hoop* ((:named foo))
+                  (return :good)))
+        :bad)))
 
-(define-test hoop.13.12
+#|(define-test hoop.13.12
 (hoop* named foo with a = (return-from foo :good) return :bad)
 :good)
 
