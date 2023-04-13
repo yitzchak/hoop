@@ -15,9 +15,9 @@
   (multiple-value-bind (*declaration-specifiers* forms)
       (parse-body body env)
     (let* ((clause (apply #'make-clause type clauses))
-           (before-tag (gensym))
-           (after-tag (gensym))
-           (epilogue-tag (gensym))
+           (before-tag (gensym "BEFORE"))
+           (after-tag (gensym "AFTER"))
+           (epilogue-tag (gensym "EPILOGUE"))
            (block-name (nth-value 2 (block-name clause))))
       (analyze clause)
       `(block ,block-name

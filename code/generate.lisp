@@ -30,6 +30,6 @@
 (defmethod next-movable-forms ((clause generate-clause))
   (if (listp (var-spec clause))
       `((setq ,(temp-var clause) (multiple-value-list ,(then-form clause))
-              ,.(apply #'nconc (bindings-from-d-var-spec (var-spec clause)
-                                                         (temp-var clause)))))
+              ,.(assignments-from-d-var-spec (var-spec clause)
+                                             (temp-var clause))))
       `((setq ,(var-spec clause) ,(then-form clause)))))

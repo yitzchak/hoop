@@ -2,13 +2,13 @@
 
 (defclass hash-table-clause (var-spec-slot in-form-slot temp-var-slot)
   ((iterator-var :reader iterator-var
-                 :initform (gensym))
+                 :initform (gensym "ITER"))
    (successp-var :reader successp-var
-                 :initform (gensym))
+                 :initform (gensym "SUCCESSP"))
    (next-key-var :accessor next-key-var
-                 :initform (gensym))
+                 :initform (gensym "NEXT-KEY-"))
    (next-value-var :accessor next-value-var
-              :initform (gensym))))
+                   :initform (gensym "NEXT-VALUE-"))))
 
 (defmethod declaration-targets ((clause hash-table-clause))
   (variable-names (var-spec clause)))

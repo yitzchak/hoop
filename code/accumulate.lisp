@@ -2,7 +2,7 @@
 
 (defclass collect-clause (var-spec-slot into-form-slot temp-var-slot)
   ((tail-var :reader tail-var
-             :initform (gensym "COLLECT-TAIL-")))
+             :initform (gensym "TAIL")))
   (:default-initargs :into nil))
 
 (defmethod make-clause ((type (eql :collect)) &rest initargs)

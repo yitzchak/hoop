@@ -102,7 +102,7 @@
 
 (defclass by-slots ()
   ((by-var :accessor by-var
-           :initform (gensym))
+           :initform (gensym "BY"))
    (by-form :accessor by-form
             :initarg :by)))
 

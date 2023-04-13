@@ -2,7 +2,7 @@
 
 (defclass step-clause (clause var-spec-slot from-form-slot by-slots)
   ((next-var :reader next-var
-             :initform (gensym)))
+             :initform (gensym "NEXT")))
   (:default-initargs :by 1
                      :from 0))
 
@@ -10,13 +10,13 @@
   ((to :reader to
        :initarg :to)
    (to-var :reader to-var
-           :initform (gensym))))
+           :initform (gensym "TO"))))
 
 (defclass before-step-clause (step-clause)
   ((before :reader before
        :initarg :before)
    (before-var :reader before-var
-               :initform (gensym))))
+               :initform (gensym "BEFORE"))))
 
 (defmethod make-clause ((keyword (eql :step)) &rest initargs)
   (apply #'make-instance (cond ((getf (cdr initargs) :to)

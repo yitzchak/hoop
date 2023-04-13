@@ -2,23 +2,23 @@
 
 (defclass list-clause (clause var-spec-slot by-slots in-form-slot update-slot)
   ((list-var :reader list-var
-             :initform (gensym))
+             :initform (gensym "LIST"))
    (next-list-var :reader next-list-var
-                  :initform (gensym)))
+                  :initform (gensym "NEXT-LIST-")))
   (:default-initargs :by '(function cdr)))
 
-(defclass list-item-clause (list-clause)
+(defclass each-item-clause (list-clause)
   ())
 
-(defclass list-sublist-clause (list-clause on-form-slot)
+(defclass each-sublist-clause (list-clause)
   ())
 
 (defmethod make-clause ((keyword (eql :each-item)) &rest initargs)
-  (apply #'make-instance 'list-item-clause
+  (apply #'make-instance 'each-item-clause
          :var-spec initargs))
 
 (defmethod make-clause ((keyword (eql :each-sublist)) &rest initargs)
-  (apply #'make-instance 'list-sublist-clause
+  (apply #'make-instance 'each-sublist-clause
          :var-spec initargs))
 
 (defmethod declaration-targets ((clause list-clause))
@@ -33,7 +33,7 @@
                                 :by ((,(by-var clause) ,(by-form clause))))))
      ,form))
 
-(defmethod wrap-inner-form ((clause list-item-clause) form)
+(defmethod wrap-inner-form ((clause each-item-clause) form)
   (if (update clause)
       `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
                                                    `(car ,(list-var clause)))
@@ -43,7 +43,7 @@
          ,.(declarations (variable-names (var-spec clause)))
         ,form)))
 
-(defmethod wrap-inner-form ((clause list-sublist-clause) form)
+(defmethod wrap-inner-form ((clause each-sublist-clause) form)
   (if (update clause)
       `(symbol-macrolet ,(bindings-from-d-var-spec (var-spec clause)
                                                    (list-var clause))
@@ -57,7 +57,7 @@
   `((when (endp ,(next-list-var clause))
       (hoop-finish))))
 
-(defmethod initial-early-forms ((clause list-sublist-clause))
+(defmethod initial-early-forms ((clause each-sublist-clause))
   `((when (atom ,(next-list-var clause))
       (hoop-finish))))
 
@@ -65,23 +65,23 @@
   (when (update clause)
     `((setq ,(list-var clause) ,(next-list-var clause)))))
 
-(defmethod next-early-forms ((clause list-item-clause))
+(defmethod next-early-forms ((clause each-item-clause))
   `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))
     (when (endp ,(next-list-var clause))
       (hoop-finish))))
   
-(defmethod next-early-forms ((clause list-sublist-clause))
+(defmethod next-early-forms ((clause each-sublist-clause))
   `((setq ,(next-list-var clause) (funcall ,(by-var clause) ,(next-list-var clause)))
     (when (atom ,(next-list-var clause))
       (hoop-finish))))
   
-(defmethod next-late-forms ((clause list-item-clause))
+(defmethod next-late-forms ((clause each-item-clause))
   (if (update clause)
       `((setq ,(list-var clause) ,(next-list-var clause)))
       `((setq ,.(assignments-from-d-var-spec (var-spec clause)
                                              `(car ,(next-list-var clause)))))))
 
-(defmethod next-late-forms ((clause list-sublist-clause))
+(defmethod next-late-forms ((clause each-sublist-clause))
   (if (update clause)
       `((setq ,(list-var clause) ,(next-list-var clause)))
       `((setq ,.(assignments-from-d-var-spec (var-spec clause)
